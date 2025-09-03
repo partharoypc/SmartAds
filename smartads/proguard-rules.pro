@@ -19,3 +19,18 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# Google Mobile Ads
+-keep class com.google.android.gms.ads.** { *; }
+-dontwarn com.google.android.gms.**
+
+# Meta Audience Network
+-keep class com.facebook.ads.** { *; }
+-dontwarn com.facebook.ads.**
+
+# Lifecycle (if using ProcessLifecycleOwner)
+-keep class androidx.lifecycle.** { *; }
+-dontwarn androidx.lifecycle.**
+
+# If you reflect on your own classes (listeners/config), keep them:
+-keep class com.partharoy.smartads.** { *; }

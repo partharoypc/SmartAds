@@ -21,4 +21,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "Smart Ads App"
 include(":app")
-include(":SmartAds")
+include(":smartads")

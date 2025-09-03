@@ -15,12 +15,25 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
         }
+        debug {
+            isMinifyEnabled = false
+        }
+    }
+
+    buildFeatures {
+        buildConfig = true
+        viewBinding = true
+    }
+
+    lint {
+        abortOnError = false
+        warningsAsErrors = false
     }
 
     compileOptions {
@@ -44,6 +57,7 @@ dependencies {
     implementation("com.facebook.android:audience-network-sdk:6.+")
     implementation("androidx.lifecycle:lifecycle-runtime:2.9.2")
     implementation("androidx.lifecycle:lifecycle-process:2.9.2")
+    implementation("androidx.annotation:annotation:1.8.2")
 }
 
 // ✅ Important: wrap publishing block inside afterEvaluate

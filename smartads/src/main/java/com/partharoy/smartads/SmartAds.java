@@ -1,5 +1,6 @@
 package com.partharoy.smartads;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
@@ -7,6 +8,7 @@ import android.util.Log;
 import android.widget.FrameLayout;
 
 import androidx.annotation.LayoutRes;
+import androidx.annotation.RequiresPermission;
 
 import com.facebook.ads.AudienceNetworkAds;
 import com.google.android.gms.ads.MobileAds;
@@ -45,6 +47,7 @@ public class SmartAds {
         return instance;
     }
 
+    @RequiresPermission(Manifest.permission.INTERNET)
     public static void initialize(Application application, SmartAdsConfig config) {
         if (instance == null) {
             instance = new SmartAds();
@@ -137,6 +140,7 @@ public class SmartAds {
     }
 
     // --- Banner Ads ---
+    @RequiresPermission(Manifest.permission.INTERNET)
     public void showBannerAd(Activity activity, FrameLayout adContainer, BannerAdListener listener) {
         if (canShowAds()) {
             bannerAdManager.loadAndShowAd(activity, adContainer, config, listener);
