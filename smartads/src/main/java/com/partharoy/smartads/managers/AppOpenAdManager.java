@@ -3,25 +3,28 @@ package com.partharoy.smartads.managers;
 import android.app.Activity;
 import android.app.Application;
 import android.os.Bundle;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
-import androidx.lifecycle.LifecycleObserver;
+import androidx.lifecycle.DefaultLifecycleObserver;
+import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.ProcessLifecycleOwner;
 
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.FullScreenContentCallback;
 import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.appopen.AppOpenAd;
+import com.partharoy.smartads.AdStatus;
 import com.partharoy.smartads.SmartAds;
 import com.partharoy.smartads.TestAdIds;
 
-public class AppOpenAdManager implements LifecycleObserver, Application.ActivityLifecycleCallbacks {
-    private static final String TAG = "AppOpenAdManager";
+public class AppOpenAdManager extends BaseFullScreenAdManager
+        implements DefaultLifecycleObserver, Application.ActivityLifecycleCallbacks {
     private final Application application;
     private AppOpenAd appOpenAd = null;
     private Activity currentActivity;
     private boolean isShowingAd = false;
+    private long loadTimeMs = 0L;
+    private static final long MAX_AD_AGE_MS = 4L * 60L * 60L * 1000L; // 4 hours per Google guidance
 
     public AppOpenAdManager(Application application) {
         this.application = application;
@@ -29,33 +32,47 @@ public class AppOpenAdManager implements LifecycleObserver, Application.Activity
         ProcessLifecycleOwner.get().getLifecycle().addObserver(this);
     }
 
-    public void onMoveToForeground() {
+    public Activity getCurrentActivityForUmp() {
+        return currentActivity;
+    }
+
+    @Override
+    public void onStart(@NonNull LifecycleOwner owner) {
         if (SmartAds.getInstance().canShowAds()) {
             showAdIfAvailable();
         }
     }
 
     public void fetchAd() {
-        if (appOpenAd != null) {
+        if (appOpenAd != null && isAdFresh()) {
             return;
         }
+        if (isLoading) {
+            return;
+        }
+        isLoading = true;
+        adStatus = AdStatus.LOADING;
+
         AppOpenAd.AppOpenAdLoadCallback loadCallback = new AppOpenAd.AppOpenAdLoadCallback() {
             @Override
             public void onAdLoaded(@NonNull AppOpenAd ad) {
                 AppOpenAdManager.this.appOpenAd = ad;
-                Log.i(TAG, "App Open Ad loaded.");
+                loadTimeMs = System.currentTimeMillis();
+                onAdLoadedBase();
             }
 
             @Override
             public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                Log.w(TAG, "App Open Ad failed to load: " + loadAdError.getMessage());
+                onAdFailedToLoadBase();
+                scheduleRetry(application, null, AppOpenAdManager.this::fetchAd);
             }
         };
-        String adUnitId = SmartAds.getInstance().getConfig().isTestMode() ?
-                TestAdIds.ADMOB_APP_OPEN_ID : SmartAds.getInstance().getConfig().getAdMobAppOpenId();
+        String adUnitId = SmartAds.getInstance().getConfig().isTestMode() ? TestAdIds.ADMOB_APP_OPEN_ID
+                : SmartAds.getInstance().getConfig().getAdMobAppOpenId();
 
         if (adUnitId == null || adUnitId.isEmpty()) {
-            Log.e(TAG, "App Open Ad ID is not set.");
+            isLoading = false;
+            adStatus = AdStatus.FAILED;
             return;
         }
 
@@ -64,7 +81,11 @@ public class AppOpenAdManager implements LifecycleObserver, Application.Activity
     }
 
     public void showAdIfAvailable() {
-        if (!isShowingAd && appOpenAd != null && currentActivity != null) {
+
+        if (!isShowingAd && appOpenAd != null && isAdFresh() && currentActivity != null
+                && !currentActivity.isFinishing() && !currentActivity.isDestroyed()
+                && !SmartAds.getInstance().isAnyAdShowing()) {
+
             FullScreenContentCallback fullScreenContentCallback = new FullScreenContentCallback() {
                 @Override
                 public void onAdDismissedFullScreenContent() {
@@ -76,13 +97,27 @@ public class AppOpenAdManager implements LifecycleObserver, Application.Activity
                 @Override
                 public void onAdShowedFullScreenContent() {
                     isShowingAd = true;
+                    adStatus = AdStatus.SHOWN;
+                }
+
+                @Override
+                public void onAdFailedToShowFullScreenContent(@NonNull com.google.android.gms.ads.AdError adError) {
+                    AppOpenAdManager.this.appOpenAd = null;
+                    isShowingAd = false;
+                    fetchAd();
                 }
             };
             appOpenAd.setFullScreenContentCallback(fullScreenContentCallback);
             appOpenAd.show(currentActivity);
         } else {
-            fetchAd();
+            if (appOpenAd == null || !isAdFresh()) {
+                fetchAd();
+            }
         }
+    }
+
+    private boolean isAdFresh() {
+        return appOpenAd != null && (System.currentTimeMillis() - loadTimeMs) < MAX_AD_AGE_MS;
     }
 
     @Override

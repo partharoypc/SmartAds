@@ -1,50 +1,52 @@
 package com.partharoy.smartads;
 
+import com.google.android.gms.ads.RequestConfiguration;
+
 public class SmartAdsConfig {
-    // Ad Unit IDs
-    private final String adMobAppId;
+    // Ad Unit IDs (minimal set)
     private final String adMobAppOpenId;
     private final String adMobBannerId;
     private final String adMobInterstitialId;
     private final String adMobRewardedId;
     private final String adMobNativeId;
-    private final String metaBannerId;
-    private final String metaInterstitialId;
-    private final String metaRewardedId;
-    private final String metaNativeId;
 
-    // Settings
+    // Basic settings
     private final boolean adsEnabled;
     private final boolean isTestMode;
-    private final boolean useMetaBackup;
-    private final int showAdsAfterDays;
-    private final long adShowIntervalMillis;
-    private final boolean showLoadingDialog;
+    private final boolean collapsibleBannerEnabled;
+    private final boolean useUmpConsent;
+
+    // Targeting
+    private final String maxAdContentRating;
+    private final int tagForChildDirectedTreatment;
+    private final int tagForUnderAgeOfConsent;
+
+    // Dialog Styling
+    private final Integer dialogBackgroundColor;
+    private final Integer dialogTextColor;
+    private final String dialogText;
+    private final java.util.List<String> testDeviceIds;
 
     private SmartAdsConfig(Builder builder) {
-        this.adMobAppId = builder.adMobAppId;
         this.adMobAppOpenId = builder.adMobAppOpenId;
         this.adMobBannerId = builder.adMobBannerId;
         this.adMobInterstitialId = builder.adMobInterstitialId;
         this.adMobRewardedId = builder.adMobRewardedId;
         this.adMobNativeId = builder.adMobNativeId;
-        this.metaBannerId = builder.metaBannerId;
-        this.metaInterstitialId = builder.metaInterstitialId;
-        this.metaRewardedId = builder.metaRewardedId;
-        this.metaNativeId = builder.metaNativeId;
         this.adsEnabled = builder.adsEnabled;
         this.isTestMode = builder.isTestMode;
-        this.useMetaBackup = builder.useMetaBackup;
-        this.showAdsAfterDays = builder.showAdsAfterDays;
-        this.adShowIntervalMillis = builder.adShowIntervalMillis;
-        this.showLoadingDialog = builder.showLoadingDialog;
+        this.collapsibleBannerEnabled = builder.collapsibleBannerEnabled;
+        this.useUmpConsent = builder.useUmpConsent;
+        this.dialogBackgroundColor = builder.dialogBackgroundColor;
+        this.dialogTextColor = builder.dialogTextColor;
+        this.dialogText = builder.dialogText;
+        this.testDeviceIds = java.util.Collections.unmodifiableList(new java.util.ArrayList<>(builder.testDeviceIds));
+        this.maxAdContentRating = builder.maxAdContentRating;
+        this.tagForChildDirectedTreatment = builder.tagForChildDirectedTreatment;
+        this.tagForUnderAgeOfConsent = builder.tagForUnderAgeOfConsent;
     }
 
     // Getters
-    public String getAdMobAppId() {
-        return adMobAppId;
-    }
-
     public String getAdMobAppOpenId() {
         return adMobAppOpenId;
     }
@@ -65,22 +67,6 @@ public class SmartAdsConfig {
         return adMobNativeId;
     }
 
-    public String getMetaBannerId() {
-        return metaBannerId;
-    }
-
-    public String getMetaInterstitialId() {
-        return metaInterstitialId;
-    }
-
-    public String getMetaRewardedId() {
-        return metaRewardedId;
-    }
-
-    public String getMetaNativeId() {
-        return metaNativeId;
-    }
-
     public boolean isAdsEnabled() {
         return adsEnabled;
     }
@@ -89,48 +75,102 @@ public class SmartAdsConfig {
         return isTestMode;
     }
 
-    public boolean isUseMetaBackup() {
-        return useMetaBackup;
+    public boolean isCollapsibleBannerEnabled() {
+        return collapsibleBannerEnabled;
     }
 
-    public int getShowAdsAfterDays() {
-        return showAdsAfterDays;
+    public boolean useUmpConsent() {
+        return useUmpConsent;
     }
 
-    public long getAdShowIntervalMillis() {
-        return adShowIntervalMillis;
+    public Integer getDialogBackgroundColor() {
+        return dialogBackgroundColor;
     }
 
-    public boolean shouldShowLoadingDialog() {
-        return showLoadingDialog;
+    public Integer getDialogTextColor() {
+        return dialogTextColor;
     }
 
+    public String getDialogText() {
+        return dialogText;
+    }
+
+    public java.util.List<String> getTestDeviceIds() {
+        return testDeviceIds;
+    }
+
+    public String getMaxAdContentRating() {
+        return maxAdContentRating;
+    }
+
+    public int getTagForChildDirectedTreatment() {
+        return tagForChildDirectedTreatment;
+    }
+
+    public int getTagForUnderAgeOfConsent() {
+        return tagForUnderAgeOfConsent;
+    }
+
+    public boolean isAppOpenConfigured() {
+        return adMobAppOpenId != null && !adMobAppOpenId.isEmpty();
+    }
+
+    public boolean isBannerConfigured() {
+        return adMobBannerId != null && !adMobBannerId.isEmpty();
+    }
+
+    public boolean isInterstitialConfigured() {
+        return adMobInterstitialId != null && !adMobInterstitialId.isEmpty();
+    }
+
+    public boolean isRewardedConfigured() {
+        return adMobRewardedId != null && !adMobRewardedId.isEmpty();
+    }
+
+    public boolean isNativeConfigured() {
+        return adMobNativeId != null && !adMobNativeId.isEmpty();
+    }
+
+    public boolean isAnyAdConfigured() {
+        return isAppOpenConfigured() || isBannerConfigured() || isInterstitialConfigured() || isRewardedConfigured()
+                || isNativeConfigured();
+    }
 
     public static class Builder {
-        private String adMobAppId = "";
         private String adMobAppOpenId = "";
         private String adMobBannerId = "";
         private String adMobInterstitialId = "";
         private String adMobRewardedId = "";
         private String adMobNativeId = "";
-        private String metaBannerId = "";
-        private String metaInterstitialId = "";
-        private String metaRewardedId = "";
-        private String metaNativeId = "";
-        private boolean adsEnabled = true;
-        private boolean isTestMode = false;
-        private boolean useMetaBackup = true;
-        private int showAdsAfterDays = 0;
-        private long adShowIntervalMillis = 60 * 1000L;
-        private boolean showLoadingDialog = true;
 
-        public Builder setAdsEnabled(boolean enabled) {
-            this.adsEnabled = enabled;
+        private boolean adsEnabled = false;
+        private boolean isTestMode = false;
+        private boolean collapsibleBannerEnabled = false;
+        private boolean useUmpConsent = false;
+        private Integer dialogBackgroundColor = null;
+        private Integer dialogTextColor = null;
+        private String dialogText = "Loading Ad...";
+        private java.util.List<String> testDeviceIds = new java.util.ArrayList<>();
+
+        // Defaults
+        private String maxAdContentRating = RequestConfiguration.MAX_AD_CONTENT_RATING_G;
+        private int tagForChildDirectedTreatment = RequestConfiguration.TAG_FOR_CHILD_DIRECTED_TREATMENT_UNSPECIFIED;
+        private int tagForUnderAgeOfConsent = RequestConfiguration.TAG_FOR_UNDER_AGE_OF_CONSENT_UNSPECIFIED;
+
+        public Builder setLoadingDialogColor(@androidx.annotation.ColorInt int backgroundColor,
+                @androidx.annotation.ColorInt int textColor) {
+            this.dialogBackgroundColor = backgroundColor;
+            this.dialogTextColor = textColor;
             return this;
         }
 
-        public Builder setAdMobAppId(String id) {
-            this.adMobAppId = id;
+        public Builder setLoadingDialogText(String text) {
+            this.dialogText = text;
+            return this;
+        }
+
+        public Builder setAdsEnabled(boolean enabled) {
+            this.adsEnabled = enabled;
             return this;
         }
 
@@ -159,48 +199,45 @@ public class SmartAdsConfig {
             return this;
         }
 
-        public Builder setMetaBannerId(String id) {
-            this.metaBannerId = id;
-            return this;
-        }
-
-        public Builder setMetaInterstitialId(String id) {
-            this.metaInterstitialId = id;
-            return this;
-        }
-
-        public Builder setMetaRewardedId(String id) {
-            this.metaRewardedId = id;
-            return this;
-        }
-
-        public Builder setMetaNativeId(String id) {
-            this.metaNativeId = id;
-            return this;
-        }
-
         public Builder enableTestMode(boolean testMode) {
             this.isTestMode = testMode;
             return this;
         }
 
-        public Builder setUseMetaBackup(boolean useBackup) {
-            this.useMetaBackup = useBackup;
+        public Builder enableCollapsibleBanner(boolean enabled) {
+            this.collapsibleBannerEnabled = enabled;
             return this;
         }
 
-        public Builder setShowAdsAfterDays(int days) {
-            this.showAdsAfterDays = days;
+        public Builder setUseUmpConsent(boolean useUmp) {
+            this.useUmpConsent = useUmp;
             return this;
         }
 
-        public Builder setAdShowIntervalMillis(long millis) {
-            this.adShowIntervalMillis = millis;
+        public Builder addTestDeviceId(String testDeviceId) {
+            if (testDeviceId != null && !testDeviceId.isEmpty()) {
+                this.testDeviceIds.add(testDeviceId);
+            }
             return this;
         }
 
-        public Builder setShowLoadingDialog(boolean show) {
-            this.showLoadingDialog = show;
+        /**
+         * Sets max ad content rating.
+         * 
+         * @param rating One of RequestConfiguration.MAX_AD_CONTENT_RATING_*.
+         */
+        public Builder setMaxAdContentRating(String rating) {
+            this.maxAdContentRating = rating;
+            return this;
+        }
+
+        public Builder setTagForChildDirectedTreatment(int tag) {
+            this.tagForChildDirectedTreatment = tag;
+            return this;
+        }
+
+        public Builder setTagForUnderAgeOfConsent(int tag) {
+            this.tagForUnderAgeOfConsent = tag;
             return this;
         }
 

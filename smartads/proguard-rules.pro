@@ -22,15 +22,29 @@
 
 # Google Mobile Ads
 -keep class com.google.android.gms.ads.** { *; }
--dontwarn com.google.android.gms.**
+-dontwarn com.google.android.gms.ads.**
 
-# Meta Audience Network
--keep class com.facebook.ads.** { *; }
--dontwarn com.facebook.ads.**
-
-# Lifecycle (if using ProcessLifecycleOwner)
+# Lifecycle
 -keep class androidx.lifecycle.** { *; }
 -dontwarn androidx.lifecycle.**
 
-# If you reflect on your own classes (listeners/config), keep them:
--keep class com.partharoy.smartads.** { *; }
+# SmartAds Library public API
+-keep public class com.partharoy.smartads.* {
+    public protected *;
+}
+-keep public class com.partharoy.smartads.listeners.* {
+    public protected *;
+}
+-keep public class com.partharoy.smartads.managers.* {
+    public protected *;
+}
+-keep public class com.partharoy.smartads.ui.* {
+    public protected *;
+}
+-keep public class com.partharoy.smartads.AdStatus { *; }
+-keep public class com.partharoy.smartads.NativeAdSize { *; }
+
+# Common attributes
+-keepattributes Signature
+-keepattributes *Annotation*
+-keepattributes EnclosingMethod,InnerClasses

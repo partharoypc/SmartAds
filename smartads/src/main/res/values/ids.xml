@@ -6,7 +6,7 @@
     <item type="id" name="ad_stars" />
     <item type="id" name="ad_body" />
     <item type="id" name="ad_media" />
-    <item type="id" name="meta_ad_media" />
+
     <item type="id" name="ad_call_to_action" />
     <item type="id" name="ad_price" />
     <item type="id" name="ad_store" />

@@ -1,11 +1,11 @@
 plugins {
-    alias(libs.plugins.android.library)
+    id("com.android.library")
     id("maven-publish")
 }
 
 android {
     namespace = "com.partharoy.smartads"
-    compileSdk = 36
+    compileSdk = 35
 
     defaultConfig {
         minSdk = 23
@@ -27,8 +27,7 @@ android {
     }
 
     buildFeatures {
-        buildConfig = true
-        viewBinding = true
+        buildConfig = false
     }
 
     lint {
@@ -37,8 +36,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     publishing {
@@ -47,17 +46,11 @@ android {
 }
 
 dependencies {
-    implementation(libs.appcompat)
-    implementation(libs.material)
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.ext.junit)
-    androidTestImplementation(libs.espresso.core)
-
-    implementation("com.google.android.gms:play-services-ads:24.5.0")
-    implementation("com.facebook.android:audience-network-sdk:6.+")
-    implementation("androidx.lifecycle:lifecycle-runtime:2.9.2")
-    implementation("androidx.lifecycle:lifecycle-process:2.9.2")
-    implementation("androidx.annotation:annotation:1.8.2")
+    // Core Dependencies
+    implementation("com.google.android.gms:play-services-ads:24.9.0")
+    implementation("androidx.lifecycle:lifecycle-runtime:2.10.0")
+    implementation("androidx.lifecycle:lifecycle-process:2.10.0")
+    implementation("androidx.annotation:annotation:1.9.1")
 }
 
 // ✅ Important: wrap publishing block inside afterEvaluate
@@ -68,11 +61,11 @@ afterEvaluate {
                 from(components["release"])
                 groupId = "com.github.partharoypc"
                 artifactId = "SmartAds"
-                version = "1.0.1"
+                version = "2.0.0"
 
                 pom {
                     name.set("SmartAds")
-                    description.set("Simple ad mediation library for Android (AdMob + Facebook)")
+                    description.set("Simple ad library for Android (AdMob)")
                     url.set("https://github.com/partharoypc/SmartAds")
                 }
             }

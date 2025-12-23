@@ -2,7 +2,6 @@ package com.partharoy.smartads.managers;
 
 import android.Manifest;
 import android.app.Activity;
-import android.util.Log;
 import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
@@ -18,75 +17,102 @@ import com.partharoy.smartads.TestAdIds;
 import com.partharoy.smartads.listeners.BannerAdListener;
 
 public class BannerAdManager {
-    private static final String TAG = "BannerAdManager";
+    private final java.util.Map<FrameLayout, Boolean> listenerAdded = new java.util.WeakHashMap<>();
 
     @RequiresPermission(Manifest.permission.INTERNET)
-    public void loadAndShowAd(Activity activity, FrameLayout adContainer, SmartAdsConfig config, BannerAdListener listener) {
+    public void loadAndShowAd(Activity activity, FrameLayout adContainer, SmartAdsConfig config,
+            BannerAdListener listener) {
         loadAdMob(activity, adContainer, config, listener);
     }
 
     @RequiresPermission(Manifest.permission.INTERNET)
-    private void loadAdMob(Activity activity, FrameLayout adContainer, SmartAdsConfig config, BannerAdListener listener) {
+    private void loadAdMob(Activity activity, FrameLayout adContainer, SmartAdsConfig config,
+            BannerAdListener listener) {
+        if (activity == null || activity.isFinishing() || activity.isDestroyed()) {
+            if (listener != null)
+                listener.onAdFailed("Activity is not valid.");
+            return;
+        }
+
         String adUnitId = config.isTestMode() ? TestAdIds.ADMOB_BANNER_ID : config.getAdMobBannerId();
         if (adUnitId == null || adUnitId.isEmpty()) {
-            if (config.isUseMetaBackup()) loadMeta(activity, adContainer, config, listener);
-            else if (listener != null)
-                listener.onAdFailed("No AdMob ID provided and backup disabled.");
+            if (listener != null)
+                listener.onAdFailed("No AdMob ID provided.");
+            return;
+        }
+
+        // Clean up existing ads before loading new one
+        destroy(adContainer);
+
+        int containerWidth = adContainer.getWidth();
+        if (containerWidth == 0) {
+            adContainer.post(() -> {
+                if (!activity.isFinishing() && !activity.isDestroyed()) {
+                    loadAdMob(activity, adContainer, config, listener);
+                }
+            });
             return;
         }
 
         AdView admobBanner = new AdView(activity);
-        admobBanner.setAdSize(AdSize.BANNER);
+        float density = activity.getResources().getDisplayMetrics().density;
+        int adWidthInDp = Math.max(0, (int) (containerWidth / density));
+        AdSize adaptiveSize = AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(activity, adWidthInDp);
+        admobBanner.setAdSize(adaptiveSize);
         admobBanner.setAdUnitId(adUnitId);
         admobBanner.setAdListener(new AdListener() {
             @Override
             public void onAdLoaded() {
+                if (!isContainerActive(adContainer) || activity.isFinishing() || activity.isDestroyed()) {
+                    try {
+                        admobBanner.destroy();
+                    } catch (Exception ignored) {
+                    }
+                    return;
+                }
                 adContainer.removeAllViews();
                 adContainer.addView(admobBanner);
-                if (listener != null) listener.onAdLoaded(admobBanner);
-                Log.i(TAG, "AdMob Banner Loaded.");
+                if (listener != null)
+                    listener.onAdLoaded(admobBanner);
             }
 
             @Override
             public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                Log.w(TAG, "AdMob Banner failed: " + loadAdError.getMessage());
-                if (config.isUseMetaBackup()) loadMeta(activity, adContainer, config, listener);
-                else if (listener != null) listener.onAdFailed(loadAdError.getMessage());
+                if (listener != null)
+                    listener.onAdFailed(loadAdError.getMessage());
             }
         });
-        admobBanner.loadAd(new AdRequest.Builder().build());
+        AdRequest.Builder builder = new AdRequest.Builder();
+        if (config.isCollapsibleBannerEnabled()) {
+            android.os.Bundle extras = new android.os.Bundle();
+            extras.putString("collapsible", "bottom");
+            builder.addNetworkExtrasBundle(com.google.ads.mediation.admob.AdMobAdapter.class, extras);
+        }
+        admobBanner.loadAd(builder.build());
     }
 
-    private void loadMeta(Activity activity, FrameLayout adContainer, SmartAdsConfig config, BannerAdListener listener) {
-        String placementId = config.isTestMode() ? TestAdIds.META_BANNER_ID.replace("YOUR_PLACEMENT_ID", config.getMetaBannerId()) : config.getMetaBannerId();
-        if (placementId == null || placementId.isEmpty()) {
-            if (listener != null) listener.onAdFailed("No Meta Placement ID provided for backup.");
-            return;
+    private boolean isContainerActive(FrameLayout adContainer) {
+        if (adContainer.getWindowToken() == null)
+            return false;
+        if (adContainer.getVisibility() != android.view.View.VISIBLE)
+            return false;
+        return adContainer.isShown();
+    }
+
+    public void destroy(FrameLayout adContainer) {
+        try {
+            int childCount = adContainer.getChildCount();
+            for (int i = 0; i < childCount; i++) {
+                android.view.View child = adContainer.getChildAt(i);
+                if (child instanceof AdView) {
+                    ((AdView) child).destroy();
+                }
+            }
+        } catch (Exception ignored) {
         }
-
-        com.facebook.ads.AdView metaBanner = new com.facebook.ads.AdView(activity, placementId, com.facebook.ads.AdSize.BANNER_HEIGHT_50);
-        metaBanner.loadAd(metaBanner.buildLoadAdConfig().withAdListener(new com.facebook.ads.AdListener() {
-            @Override
-            public void onAdLoaded(com.facebook.ads.Ad ad) {
-                adContainer.removeAllViews();
-                adContainer.addView(metaBanner);
-                if (listener != null) listener.onAdLoaded(metaBanner);
-                Log.i(TAG, "Meta Banner Loaded.");
-            }
-
-            @Override
-            public void onError(com.facebook.ads.Ad ad, com.facebook.ads.AdError adError) {
-                Log.e(TAG, "Meta Banner failed: " + adError.getErrorMessage());
-                if (listener != null) listener.onAdFailed(adError.getErrorMessage());
-            }
-
-            @Override
-            public void onAdClicked(com.facebook.ads.Ad ad) {
-            }
-
-            @Override
-            public void onLoggingImpression(com.facebook.ads.Ad ad) {
-            }
-        }).build());
+        try {
+            adContainer.removeAllViews();
+        } catch (Exception ignored) {
+        }
     }
 }

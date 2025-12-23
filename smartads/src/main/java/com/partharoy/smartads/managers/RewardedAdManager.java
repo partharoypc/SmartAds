@@ -2,7 +2,6 @@ package com.partharoy.smartads.managers;
 
 import android.app.Activity;
 import android.content.Context;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -15,47 +14,29 @@ import com.partharoy.smartads.AdStatus;
 import com.partharoy.smartads.SmartAdsConfig;
 import com.partharoy.smartads.TestAdIds;
 import com.partharoy.smartads.listeners.RewardedAdListener;
-import com.partharoy.smartads.ui.LoadingAdDialog;
 
-public class RewardedAdManager {
-    private static final String TAG = "RewardedAdManager";
+public class RewardedAdManager extends BaseFullScreenAdManager {
     private RewardedAd admobRewardedAd;
-    private com.facebook.ads.RewardedVideoAd metaRewardedAd;
-    private AdStatus adStatus = AdStatus.IDLE;
-    private LoadingAdDialog loadingDialog;
     private RewardedAdListener developerListener;
 
-    public AdStatus getAdStatus() {
-        return adStatus;
-    }
-
     public void loadAd(Context context, SmartAdsConfig config) {
-        if (adStatus == AdStatus.LOADING || adStatus == AdStatus.LOADED) {
+        if (adStatus == AdStatus.LOADING || adStatus == AdStatus.LOADED || isLoading) {
             return;
         }
         adStatus = AdStatus.LOADING;
-        if (config.shouldShowLoadingDialog()) {
-            loadingDialog = new LoadingAdDialog(context);
-            loadingDialog.show("Loading Reward...");
-        }
+        isLoading = true;
         loadAdMob(context, config);
-    }
-
-    private void dismissLoadingDialog() {
-        if (loadingDialog != null) {
-            loadingDialog.dismiss();
-            loadingDialog = null;
-        }
     }
 
     private void loadAdMob(Context context, SmartAdsConfig config) {
         String adUnitId = config.isTestMode() ? TestAdIds.ADMOB_REWARDED_ID : config.getAdMobRewardedId();
         if (adUnitId == null || adUnitId.isEmpty()) {
-            if (config.isUseMetaBackup()) loadMeta(context, config);
-            else {
-                adStatus = AdStatus.FAILED;
-                dismissLoadingDialog();
+            onAdFailedToLoadBase();
+            if (isShowPending && developerListener != null) {
+                developerListener.onAdFailedToShow("Ad Unit ID is missing.");
             }
+            isShowPending = false;
+            pendingActivity = null;
             return;
         }
 
@@ -64,104 +45,84 @@ public class RewardedAdManager {
             @Override
             public void onAdLoaded(@NonNull RewardedAd rewardedAd) {
                 admobRewardedAd = rewardedAd;
-                adStatus = AdStatus.LOADED;
-                dismissLoadingDialog();
-                Log.i(TAG, "AdMob Rewarded Ad Loaded.");
+                onAdLoadedBase();
+
+                if (isShowPending && pendingActivity != null) {
+                    showAd(pendingActivity, developerListener);
+                    isShowPending = false;
+                    pendingActivity = null;
+                }
             }
 
             @Override
             public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                Log.w(TAG, "AdMob Rewarded Ad failed: " + loadAdError.getMessage());
-                if (config.isUseMetaBackup()) loadMeta(context, config);
-                else {
-                    adStatus = AdStatus.FAILED;
-                    dismissLoadingDialog();
+                onAdFailedToLoadBase();
+
+                if (isShowPending && developerListener != null) {
+                    developerListener.onAdFailedToShow(loadAdError.getMessage());
                 }
+                isShowPending = false;
+                pendingActivity = null;
+
+                scheduleRetry(context, config, () -> loadAd(context, config));
             }
         });
     }
 
-    private void loadMeta(Context context, SmartAdsConfig config) {
-        String placementId = config.isTestMode() ? TestAdIds.META_REWARDED_ID.replace("YOUR_PLACEMENT_ID", config.getMetaRewardedId()) : config.getMetaRewardedId();
-        if (placementId == null || placementId.isEmpty()) {
-            adStatus = AdStatus.FAILED;
-            dismissLoadingDialog();
-            return;
-        }
-
-        metaRewardedAd = new com.facebook.ads.RewardedVideoAd(context, placementId);
-        com.facebook.ads.RewardedVideoAdListener metaListener = new com.facebook.ads.RewardedVideoAdListener() {
-            @Override
-            public void onAdLoaded(com.facebook.ads.Ad ad) {
-                adStatus = AdStatus.LOADED;
-                dismissLoadingDialog();
-                Log.i(TAG, "Meta Rewarded Ad Loaded.");
-            }
-
-            @Override
-            public void onError(com.facebook.ads.Ad ad, com.facebook.ads.AdError adError) {
-                adStatus = AdStatus.FAILED;
-                dismissLoadingDialog();
-                Log.e(TAG, "Meta Rewarded Ad failed: " + adError.getErrorMessage());
-                if (developerListener != null)
-                    developerListener.onAdFailedToShow(adError.getErrorMessage());
-            }
-
-            @Override
-            public void onRewardedVideoCompleted() {
-                if (developerListener != null) developerListener.onUserEarnedReward();
-            }
-
-            @Override
-            public void onRewardedVideoClosed() {
-                if (developerListener != null) developerListener.onAdDismissed();
-                metaRewardedAd = null;
-                adStatus = AdStatus.IDLE;
-            }
-
-            @Override
-            public void onAdClicked(com.facebook.ads.Ad ad) {
-            }
-
-            @Override
-            public void onLoggingImpression(com.facebook.ads.Ad ad) {
-            }
-        };
-        metaRewardedAd.loadAd(metaRewardedAd.buildLoadAdConfig().withAdListener(metaListener).build());
-    }
-
     public void showAd(Activity activity, RewardedAdListener listener) {
-        if (adStatus != AdStatus.LOADED) {
-            if (listener != null) listener.onAdFailedToShow("Ad not loaded.");
+        if (activity == null || activity.isFinishing() || activity.isDestroyed()) {
+            if (listener != null)
+                listener.onAdFailedToShow("Activity is invalid.");
             return;
         }
 
         this.developerListener = listener;
 
+        if (adStatus == AdStatus.LOADING) {
+            isShowPending = true;
+            pendingActivity = activity;
+            showLoadingDialog(activity);
+            return;
+        }
+
+        if (adStatus != AdStatus.LOADED) {
+            // Not loaded and not loading -> Start loading and wait
+            isShowPending = true;
+            pendingActivity = activity;
+            showLoadingDialog(activity);
+            SmartAdsConfig config = com.partharoy.smartads.SmartAds.getInstance().getConfig();
+            loadAd(activity, config);
+            return;
+        }
+
+        // Ad is LOADED, show it
         if (admobRewardedAd != null) {
             admobRewardedAd.setFullScreenContentCallback(new FullScreenContentCallback() {
                 @Override
                 public void onAdDismissedFullScreenContent() {
-                    if (developerListener != null) developerListener.onAdDismissed();
+                    if (developerListener != null)
+                        developerListener.onAdDismissed();
                     admobRewardedAd = null;
                     adStatus = AdStatus.IDLE;
                 }
 
                 @Override
                 public void onAdFailedToShowFullScreenContent(@NonNull com.google.android.gms.ads.AdError adError) {
-                    if (developerListener != null)
+                    if (developerListener != null) {
                         developerListener.onAdFailedToShow(adError.getMessage());
+                    }
                     admobRewardedAd = null;
                     adStatus = AdStatus.IDLE;
                 }
             });
             admobRewardedAd.show(activity, rewardItem -> {
-                if (developerListener != null) developerListener.onUserEarnedReward();
+                if (developerListener != null)
+                    developerListener.onUserEarnedReward();
             });
             adStatus = AdStatus.SHOWN;
-        } else if (metaRewardedAd != null && metaRewardedAd.isAdLoaded()) {
-            metaRewardedAd.show();
-            adStatus = AdStatus.SHOWN;
+        } else {
+            if (developerListener != null)
+                listener.onAdFailedToShow("Ad not loaded.");
         }
     }
 }

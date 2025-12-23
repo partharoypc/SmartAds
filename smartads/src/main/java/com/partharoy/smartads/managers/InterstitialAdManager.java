@@ -2,7 +2,6 @@ package com.partharoy.smartads.managers;
 
 import android.app.Activity;
 import android.content.Context;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -14,49 +13,31 @@ import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
 import com.partharoy.smartads.AdStatus;
 import com.partharoy.smartads.SmartAdsConfig;
 import com.partharoy.smartads.TestAdIds;
-import com.partharoy.smartads.helpers.AdIntervalHelper;
 import com.partharoy.smartads.listeners.InterstitialAdListener;
-import com.partharoy.smartads.ui.LoadingAdDialog;
 
-public class InterstitialAdManager {
-    private static final String TAG = "InterstitialAdManager";
+public class InterstitialAdManager extends BaseFullScreenAdManager {
     private InterstitialAd admobInterstitial;
-    private com.facebook.ads.InterstitialAd metaInterstitial;
-    private AdStatus adStatus = AdStatus.IDLE;
-    private LoadingAdDialog loadingDialog;
     private InterstitialAdListener developerListener;
 
-    public AdStatus getAdStatus() {
-        return adStatus;
-    }
-
     public void loadAd(Context context, SmartAdsConfig config) {
-        if (adStatus == AdStatus.LOADING || adStatus == AdStatus.LOADED) {
+        if (adStatus == AdStatus.LOADING || adStatus == AdStatus.LOADED || isLoading) {
             return;
         }
         adStatus = AdStatus.LOADING;
-        if (config.shouldShowLoadingDialog()) {
-            loadingDialog = new LoadingAdDialog(context);
-            loadingDialog.show("Loading Ad...");
-        }
+        isLoading = true;
         loadAdMob(context, config);
-    }
-
-    private void dismissLoadingDialog() {
-        if (loadingDialog != null) {
-            loadingDialog.dismiss();
-            loadingDialog = null;
-        }
     }
 
     private void loadAdMob(Context context, SmartAdsConfig config) {
         String adUnitId = config.isTestMode() ? TestAdIds.ADMOB_INTERSTITIAL_ID : config.getAdMobInterstitialId();
         if (adUnitId == null || adUnitId.isEmpty()) {
-            if (config.isUseMetaBackup()) loadMeta(context, config);
-            else {
-                adStatus = AdStatus.FAILED;
-                dismissLoadingDialog();
+            onAdFailedToLoadBase();
+
+            if (isShowPending && developerListener != null) {
+                developerListener.onAdFailedToShow("Ad Unit ID is missing.");
             }
+            isShowPending = false;
+            pendingActivity = null;
             return;
         }
 
@@ -65,92 +46,71 @@ public class InterstitialAdManager {
             @Override
             public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
                 admobInterstitial = interstitialAd;
-                adStatus = AdStatus.LOADED;
-                dismissLoadingDialog();
-                Log.i(TAG, "AdMob Interstitial Loaded.");
+                onAdLoadedBase();
+
+                if (isShowPending && pendingActivity != null) {
+                    showAd(pendingActivity, developerListener);
+                    isShowPending = false;
+                    pendingActivity = null;
+                }
             }
 
             @Override
             public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                Log.w(TAG, "AdMob Interstitial failed: " + loadAdError.getMessage());
-                if (config.isUseMetaBackup()) loadMeta(context, config);
-                else {
-                    adStatus = AdStatus.FAILED;
-                    dismissLoadingDialog();
+                onAdFailedToLoadBase();
+
+                if (isShowPending && developerListener != null) {
+                    developerListener.onAdFailedToShow(loadAdError.getMessage());
                 }
+                isShowPending = false;
+                pendingActivity = null;
+
+                scheduleRetry(context, config, () -> loadAd(context, config));
             }
         });
     }
 
-    private void loadMeta(Context context, SmartAdsConfig config) {
-        String placementId = config.isTestMode() ? TestAdIds.META_INTERSTITIAL_ID.replace("YOUR_PLACEMENT_ID", config.getMetaInterstitialId()) : config.getMetaInterstitialId();
-        if (placementId == null || placementId.isEmpty()) {
-            adStatus = AdStatus.FAILED;
-            dismissLoadingDialog();
-            return;
-        }
-
-        metaInterstitial = new com.facebook.ads.InterstitialAd(context, placementId);
-        com.facebook.ads.InterstitialAdListener metaListener = new com.facebook.ads.InterstitialAdListener() {
-            @Override
-            public void onAdLoaded(com.facebook.ads.Ad ad) {
-                adStatus = AdStatus.LOADED;
-                dismissLoadingDialog();
-                Log.i(TAG, "Meta Interstitial Loaded.");
-            }
-
-            @Override
-            public void onError(com.facebook.ads.Ad ad, com.facebook.ads.AdError adError) {
-                adStatus = AdStatus.FAILED;
-                dismissLoadingDialog();
-                Log.e(TAG, "Meta Interstitial failed: " + adError.getErrorMessage());
-                if (developerListener != null)
-                    developerListener.onAdFailedToShow(adError.getErrorMessage());
-            }
-
-            @Override
-            public void onInterstitialDismissed(com.facebook.ads.Ad ad) {
-                if (developerListener != null) developerListener.onAdDismissed();
-                metaInterstitial = null;
-                adStatus = AdStatus.IDLE;
-            }
-
-            @Override
-            public void onInterstitialDisplayed(com.facebook.ads.Ad ad) {
-            }
-
-            @Override
-            public void onAdClicked(com.facebook.ads.Ad ad) {
-            }
-
-            @Override
-            public void onLoggingImpression(com.facebook.ads.Ad ad) {
-            }
-        };
-        metaInterstitial.loadAd(metaInterstitial.buildLoadAdConfig().withAdListener(metaListener).build());
-    }
-
     public void showAd(Activity activity, InterstitialAdListener listener) {
-        if (adStatus != AdStatus.LOADED) {
-            if (listener != null) listener.onAdFailedToShow("Ad not loaded.");
+        if (activity == null || activity.isFinishing() || activity.isDestroyed()) {
+            if (listener != null)
+                listener.onAdFailedToShow("Activity is invalid.");
             return;
         }
 
         this.developerListener = listener;
 
+        if (adStatus == AdStatus.LOADING) {
+            isShowPending = true;
+            pendingActivity = activity;
+            showLoadingDialog(activity);
+            return;
+        }
+
+        if (adStatus != AdStatus.LOADED) {
+            // Not loaded -> load and wait
+            isShowPending = true;
+            pendingActivity = activity;
+            showLoadingDialog(activity);
+            SmartAdsConfig config = com.partharoy.smartads.SmartAds.getInstance().getConfig();
+            loadAd(activity, config);
+            return;
+        }
+
         if (admobInterstitial != null) {
             admobInterstitial.setFullScreenContentCallback(new FullScreenContentCallback() {
                 @Override
                 public void onAdDismissedFullScreenContent() {
-                    if (developerListener != null) developerListener.onAdDismissed();
+                    if (developerListener != null)
+                        developerListener.onAdDismissed();
                     admobInterstitial = null;
                     adStatus = AdStatus.IDLE;
                 }
 
                 @Override
                 public void onAdFailedToShowFullScreenContent(@NonNull com.google.android.gms.ads.AdError adError) {
-                    if (developerListener != null)
+                    if (developerListener != null) {
                         developerListener.onAdFailedToShow(adError.getMessage());
+                    }
                     admobInterstitial = null;
                     adStatus = AdStatus.IDLE;
                 }
@@ -158,14 +118,12 @@ public class InterstitialAdManager {
                 @Override
                 public void onAdShowedFullScreenContent() {
                     adStatus = AdStatus.SHOWN;
-                    AdIntervalHelper.onAdShown();
                 }
             });
             admobInterstitial.show(activity);
-        } else if (metaInterstitial != null && metaInterstitial.isAdLoaded()) {
-            metaInterstitial.show();
-            adStatus = AdStatus.SHOWN;
-            AdIntervalHelper.onAdShown();
+        } else {
+            if (developerListener != null)
+                listener.onAdFailedToShow("Ad not loaded.");
         }
     }
 }
