@@ -16,6 +16,7 @@ import com.google.android.gms.ads.appopen.AppOpenAd;
 import com.partharoy.smartads.AdStatus;
 import com.partharoy.smartads.SmartAds;
 import com.partharoy.smartads.TestAdIds;
+import com.partharoy.smartads.listeners.AppOpenAdListener;
 
 public class AppOpenAdManager extends BaseFullScreenAdManager
         implements DefaultLifecycleObserver, Application.ActivityLifecycleCallbacks {
@@ -24,12 +25,18 @@ public class AppOpenAdManager extends BaseFullScreenAdManager
     private Activity currentActivity;
     private boolean isShowingAd = false;
     private long loadTimeMs = 0L;
-    private static final long MAX_AD_AGE_MS = 4L * 60L * 60L * 1000L; // 4 hours per Google guidance
+    private static final long MAX_AD_AGE_MS = 1L * 60L * 60L * 1000L; // 1 hour for high revenue freshness
+    private AppOpenAdListener developerListener;
 
     public AppOpenAdManager(Application application) {
         this.application = application;
         this.application.registerActivityLifecycleCallbacks(this);
         ProcessLifecycleOwner.get().getLifecycle().addObserver(this);
+        this.isAutoReloadEnabled = true;
+    }
+
+    public void setListener(AppOpenAdListener listener) {
+        this.developerListener = listener;
     }
 
     public Activity getCurrentActivityForUmp() {
@@ -105,6 +112,20 @@ public class AppOpenAdManager extends BaseFullScreenAdManager
                     AppOpenAdManager.this.appOpenAd = null;
                     isShowingAd = false;
                     fetchAd();
+                }
+
+                @Override
+                public void onAdImpression() {
+                    if (developerListener != null) {
+                        developerListener.onAdImpression();
+                    }
+                }
+
+                @Override
+                public void onAdClicked() {
+                    if (developerListener != null) {
+                        developerListener.onAdClicked();
+                    }
                 }
             };
             appOpenAd.setFullScreenContentCallback(fullScreenContentCallback);

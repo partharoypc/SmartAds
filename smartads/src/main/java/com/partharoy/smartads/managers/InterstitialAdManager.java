@@ -86,6 +86,12 @@ public class InterstitialAdManager extends BaseFullScreenAdManager {
             return;
         }
 
+        if (isFrequencyCapped(com.partharoy.smartads.SmartAds.getInstance().getConfig())) {
+            if (listener != null)
+                listener.onAdFailedToShow("Ad is frequency capped.");
+            return;
+        }
+
         if (adStatus != AdStatus.LOADED) {
             // Not loaded -> load and wait
             isShowPending = true;
@@ -104,6 +110,9 @@ public class InterstitialAdManager extends BaseFullScreenAdManager {
                         developerListener.onAdDismissed();
                     admobInterstitial = null;
                     adStatus = AdStatus.IDLE;
+                    if (isAutoReloadEnabled) {
+                        loadAd(activity, com.partharoy.smartads.SmartAds.getInstance().getConfig());
+                    }
                 }
 
                 @Override
@@ -113,11 +122,25 @@ public class InterstitialAdManager extends BaseFullScreenAdManager {
                     }
                     admobInterstitial = null;
                     adStatus = AdStatus.IDLE;
+                    if (isAutoReloadEnabled) {
+                        loadAd(activity, com.partharoy.smartads.SmartAds.getInstance().getConfig());
+                    }
                 }
 
                 @Override
                 public void onAdShowedFullScreenContent() {
                     adStatus = AdStatus.SHOWN;
+                    lastShownTime = System.currentTimeMillis();
+                    if (developerListener != null) {
+                        developerListener.onAdImpression();
+                    }
+                }
+
+                @Override
+                public void onAdClicked() {
+                    if (developerListener != null) {
+                        developerListener.onAdClicked();
+                    }
                 }
             });
             admobInterstitial.show(activity);

@@ -9,7 +9,7 @@
 [![](https://jitpack.io/v/partharoypc/SmartAds.svg)](https://jitpack.io/#partharoypc/SmartAds)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Android](https://img.shields.io/badge/Platform-Android-green.svg)]()
-[![Google Mobile Ads](https://img.shields.io/badge/SDK-AdMob_23.6.0-blue.svg)]()
+[![Google Mobile Ads](https://img.shields.io/badge/SDK-AdMob_24.9.0-blue.svg)]()
 
 ---
 
@@ -23,7 +23,7 @@
 - **🧪 Intelligent Test Mode**: Automatic toggle between production IDs and Google's official Test IDs.
 - **⚡ Smart Pre-fetching**: Automatic caching for Interstitial, Rewarded, and App Open ads.
 - **📢 Consent Management**: Seamless integration with Google User Messaging Platform (UMP).
-- **🎛️ Dynamic Control**: Global master switch and per-ad-type status checks for maximum flexibility.
+- **🎛️ Dynamic Control**: Global master switch, per-ad-type status checks, and **Frequency Capping**.
 - **🌑 Privacy Focused**: Ads are disabled by default until explicitly enabled.
 
 ---
@@ -48,8 +48,8 @@ Add the SmartAds library and the Google Mobile Ads SDK to your app-level `build.
 
 ```groovy
 dependencies {
-    implementation 'com.github.partharoypc:SmartAds:2.0.0' // Check JitPack for latest
-    implementation 'com.google.android.gms:play-services-ads:23.6.0' 
+    implementation 'com.github.partharoypc:SmartAds:3.0.0' // Check JitPack for latest
+    implementation 'com.google.android.gms:play-services-ads:24.9.0' 
 }
 ```
 
@@ -87,6 +87,7 @@ public class MyApplication extends Application {
             .enableTestMode(true)             // Set 'false' for Production release
             .enableCollapsibleBanner(true)    // Enable specialized collapsible banners
             .setUseUmpConsent(true)           // Show Google UMP Consent form at start
+            .setFrequencyCap(30)              // Minimum seconds between full-screen ads
             
             // 🎨 Optional: Styling for full-screen loading dialogs
             .setLoadingDialogText("Preparing your reward...")
@@ -167,7 +168,12 @@ Native ads allow you to match the look and feel of your app perfectly. We provid
 **Show with Templates:**
 ```java
 // Sizes: NativeAdSize.SMALL, MEDIUM, or LARGE
-SmartAds.getInstance().showNativeAd(this, nativeContainer, NativeAdSize.MEDIUM, listener);
+SmartAds.getInstance().showNativeAd(this, nativeContainer, NativeAdSize.MEDIUM, new NativeAdListener() {
+    @Override
+    public void onAdLoaded() {}
+    @Override
+    public void onAdFailed(String error) {}
+});
 ```
 
 **Show with Custom Layout:**
@@ -193,13 +199,16 @@ SmartAds.getInstance().showAppOpenAd(this);
 | `setAdsEnabled(boolean)` | Enable/Disable ads dynamically (e.g., after Pro purchase). |
 | `areAdsEnabled()` | Quick check for ad status. |
 | `isAnyAdShowing()` | Returns true if an Interstitial/Rewarded/AppOpen is currently on screen. |
+| `isPrivacyOptionsRequired()` | Check if UMP privacy options need to be shown to the user. |
 | `showPrivacyOptionsForm(Activity)`| Manually trigger the UMP privacy settings form. |
+| `launchAdInspector(Activity)`| Open the Google Ad Inspector for debugging. |
 | `destroyBannerIn(container)`| Recommended for `onDestroy()` to prevent leaks. |
 
 ### Configuration Options
 | Builder Method | Purpose |
 |----------------|---------|
 | `addTestDeviceId(String)` | Add a device ID for safe testing on real hardware. |
+| `setFrequencyCap(long)` | Minimum interval (seconds) between full-screen ads. |
 | `setTagForChildDirectedTreatment(int)` | Compliance for COPPA. |
 | `setTagForUnderAgeOfConsent(int)` | Compliance for GDPR under-age users. |
 | `setLoadingDialogText(String)` | Change the message shown while loading full-screen ads. |

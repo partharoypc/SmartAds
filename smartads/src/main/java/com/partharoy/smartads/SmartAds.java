@@ -14,6 +14,7 @@ import com.google.android.gms.ads.RequestConfiguration;
 import com.google.android.ump.ConsentInformation;
 import com.google.android.ump.ConsentRequestParameters;
 import com.google.android.ump.UserMessagingPlatform;
+import com.partharoy.smartads.listeners.AppOpenAdListener;
 import com.partharoy.smartads.listeners.BannerAdListener;
 import com.partharoy.smartads.listeners.InterstitialAdListener;
 import com.partharoy.smartads.listeners.NativeAdListener;
@@ -36,6 +37,8 @@ public class SmartAds {
     private BannerAdManager bannerAdManager;
     private NativeAdManager nativeAdManager;
 
+    private Application application;
+
     private SmartAds() {
     }
 
@@ -45,7 +48,11 @@ public class SmartAds {
         consentInformation.requestConsentInfoUpdate(
                 appOpenAdManager != null ? appOpenAdManager.getCurrentActivityForUmp() : null,
                 params,
-                () -> initializeSdks(application),
+                () -> {
+                    UserMessagingPlatform.loadAndShowConsentFormIfRequired(
+                            appOpenAdManager != null ? appOpenAdManager.getCurrentActivityForUmp() : null,
+                            formError -> initializeSdks(application));
+                },
                 requestConsentError -> initializeSdks(application));
     }
 
@@ -81,6 +88,7 @@ public class SmartAds {
             synchronized (SmartAds.class) {
                 if (instance == null) {
                     instance = new SmartAds();
+                    instance.application = application;
                     instance.config = config;
                     instance.adsEnabled = config.isAdsEnabled();
 
@@ -114,6 +122,32 @@ public class SmartAds {
 
                 }
             }
+        }
+    }
+
+    public void launchAdInspector(Activity activity) {
+        MobileAds.openAdInspector(activity, error -> {
+            /* Ad inspector closed or error */
+        });
+    }
+
+    public boolean isPrivacyOptionsRequired() {
+        return UserMessagingPlatform.getConsentInformation(application)
+                .getPrivacyOptionsRequirementStatus() == ConsentInformation.PrivacyOptionsRequirementStatus.REQUIRED;
+    }
+
+    public void preloadAds(Context context) {
+        if (!canShowAds())
+            return;
+
+        if (appOpenAdManager != null && config.isAppOpenConfigured()) {
+            appOpenAdManager.fetchAd();
+        }
+        if (interstitialAdManager != null && config.isInterstitialConfigured()) {
+            interstitialAdManager.loadAd(context, config);
+        }
+        if (rewardedAdManager != null && config.isRewardedConfigured()) {
+            rewardedAdManager.loadAd(context, config);
         }
     }
 
@@ -159,6 +193,18 @@ public class SmartAds {
 
     public boolean areAdsEnabled() {
         return this.adsEnabled;
+    }
+
+    public void setAppOpenAdListener(AppOpenAdListener listener) {
+        if (appOpenAdManager != null) {
+            appOpenAdManager.setListener(listener);
+        }
+    }
+
+    public void updateConfig(SmartAdsConfig newConfig) {
+        this.config = newConfig;
+        this.adsEnabled = newConfig.isAdsEnabled();
+        // Configuration updated. Managers will use new IDs on next load.
     }
 
     public SmartAdsConfig getConfig() {

@@ -25,6 +25,7 @@ public class SmartAdsConfig {
     private final Integer dialogBackgroundColor;
     private final Integer dialogTextColor;
     private final String dialogText;
+    private final long frequencyCapSeconds;
     private final java.util.List<String> testDeviceIds;
 
     private SmartAdsConfig(Builder builder) {
@@ -40,6 +41,7 @@ public class SmartAdsConfig {
         this.dialogBackgroundColor = builder.dialogBackgroundColor;
         this.dialogTextColor = builder.dialogTextColor;
         this.dialogText = builder.dialogText;
+        this.frequencyCapSeconds = builder.frequencyCapSeconds;
         this.testDeviceIds = java.util.Collections.unmodifiableList(new java.util.ArrayList<>(builder.testDeviceIds));
         this.maxAdContentRating = builder.maxAdContentRating;
         this.tagForChildDirectedTreatment = builder.tagForChildDirectedTreatment;
@@ -111,6 +113,10 @@ public class SmartAdsConfig {
         return tagForUnderAgeOfConsent;
     }
 
+    public long getFrequencyCapSeconds() {
+        return frequencyCapSeconds;
+    }
+
     public boolean isAppOpenConfigured() {
         return adMobAppOpenId != null && !adMobAppOpenId.isEmpty();
     }
@@ -150,6 +156,7 @@ public class SmartAdsConfig {
         private Integer dialogBackgroundColor = null;
         private Integer dialogTextColor = null;
         private String dialogText = "Loading Ad...";
+        private long frequencyCapSeconds = 30; // 30 seconds default cap
         private java.util.List<String> testDeviceIds = new java.util.ArrayList<>();
 
         // Defaults
@@ -211,6 +218,11 @@ public class SmartAdsConfig {
 
         public Builder setUseUmpConsent(boolean useUmp) {
             this.useUmpConsent = useUmp;
+            return this;
+        }
+
+        public Builder setFrequencyCap(long seconds) {
+            this.frequencyCapSeconds = seconds;
             return this;
         }
 

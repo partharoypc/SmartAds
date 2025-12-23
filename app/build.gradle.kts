@@ -7,7 +7,7 @@ android {
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.creator.smartadsapp"
+        applicationId = "com.partharoy.smartadsapp"
         minSdk = 23
         targetSdk = 35
         versionCode = 1

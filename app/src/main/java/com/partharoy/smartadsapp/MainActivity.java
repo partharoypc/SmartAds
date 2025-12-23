@@ -51,6 +51,9 @@ public class MainActivity extends AppCompatActivity {
     private Button btnLoadNative;
     private FrameLayout nativeContainer;
 
+    // Debug Utilities
+    private Button btnAdInspector, btnPrivacyOptions;
+
     // Logger
     private TextView textLogger;
     private Button btnClearLog;
@@ -100,6 +103,9 @@ public class MainActivity extends AppCompatActivity {
         textLogger = findViewById(R.id.text_logger);
         btnClearLog = findViewById(R.id.btn_clear_log);
         logScrollView = (ScrollView) textLogger.getParent();
+
+        btnAdInspector = findViewById(R.id.btn_ad_inspector);
+        btnPrivacyOptions = findViewById(R.id.btn_privacy_options);
     }
 
     private void setupListeners() {
@@ -127,6 +133,22 @@ public class MainActivity extends AppCompatActivity {
         // Log
         btnClearLog.setOnClickListener(v -> {
             textLogger.setText("> Logs cleared...\n");
+        });
+
+        // Debug Utilities
+        btnAdInspector.setOnClickListener(v -> {
+            log("Opening Ad Inspector...");
+            SmartAds.getInstance().launchAdInspector(this);
+        });
+
+        btnPrivacyOptions.setOnClickListener(v -> {
+            if (SmartAds.getInstance().isPrivacyOptionsRequired()) {
+                log("Opening Privacy Options Form...");
+                SmartAds.getInstance().showPrivacyOptionsForm(this);
+            } else {
+                log("Privacy Options Form not required at this time.");
+                Toast.makeText(this, "Privacy Options not required", Toast.LENGTH_SHORT).show();
+            }
         });
     }
 
@@ -249,7 +271,7 @@ public class MainActivity extends AppCompatActivity {
 
         SmartAds.getInstance().showNativeAd(this, nativeContainer, size, new NativeAdListener() {
             @Override
-            public void onAdLoaded(View nativeAdView) {
+            public void onAdLoaded(android.view.View nativeAdView) {
                 log("Native Ad Loaded");
             }
 

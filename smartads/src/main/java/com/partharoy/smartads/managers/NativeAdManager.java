@@ -101,7 +101,23 @@ public class NativeAdManager {
                     listener.onAdFailed(loadAdError.getMessage());
                 scheduleRetry(activity, adContainer, layoutRes, config, listener);
             }
+
+            @Override
+            public void onAdClicked() {
+                if (listener != null)
+                    listener.onAdClicked();
+            }
+
+            @Override
+            public void onAdImpression() {
+                if (listener != null)
+                    listener.onAdImpression();
+            }
         }).build();
+
+        // Attach Paid Event Listener to the loaded native ad in forNativeAd callback
+        // This is handled inside forNativeAd block above
+
         adLoader.loadAd(new AdRequest.Builder().build());
         if (listenerAdded.get(adContainer) == null) {
             adContainer.addOnAttachStateChangeListener(new android.view.View.OnAttachStateChangeListener() {

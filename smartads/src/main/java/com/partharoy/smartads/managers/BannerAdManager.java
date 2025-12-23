@@ -81,7 +81,20 @@ public class BannerAdManager {
                 if (listener != null)
                     listener.onAdFailed(loadAdError.getMessage());
             }
+
+            @Override
+            public void onAdOpened() {
+                if (listener != null)
+                    listener.onAdClicked();
+            }
+
+            @Override
+            public void onAdImpression() {
+                if (listener != null)
+                    listener.onAdImpression();
+            }
         });
+
         AdRequest.Builder builder = new AdRequest.Builder();
         if (config.isCollapsibleBannerEnabled()) {
             android.os.Bundle extras = new android.os.Bundle();

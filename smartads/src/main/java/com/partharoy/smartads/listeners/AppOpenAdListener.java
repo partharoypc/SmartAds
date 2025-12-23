@@ -1,8 +1,6 @@
 package com.partharoy.smartads.listeners;
 
-public interface RewardedAdListener {
-    void onUserEarnedReward();
-
+public interface AppOpenAdListener {
     void onAdDismissed();
 
     void onAdFailedToShow(String errorMessage);

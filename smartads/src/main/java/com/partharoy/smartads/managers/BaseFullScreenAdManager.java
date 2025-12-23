@@ -18,9 +18,22 @@ public abstract class BaseFullScreenAdManager {
     protected boolean isLoading = false;
     protected final Handler handler = new Handler(Looper.getMainLooper());
     protected int retryAttempt = 0;
+    protected static long lastShownTime = 0; // Static to cap across types if needed, or non-static for per-type
+
+    protected boolean isAutoReloadEnabled = true;
+
+    protected boolean isFrequencyCapped(SmartAdsConfig config) {
+        long currentTime = System.currentTimeMillis();
+        long diffSeconds = (currentTime - lastShownTime) / 1000;
+        return diffSeconds < config.getFrequencyCapSeconds();
+    }
 
     public AdStatus getAdStatus() {
         return adStatus;
+    }
+
+    public void setAutoReloadEnabled(boolean enabled) {
+        this.isAutoReloadEnabled = enabled;
     }
 
     protected void showLoadingDialog(Activity activity) {

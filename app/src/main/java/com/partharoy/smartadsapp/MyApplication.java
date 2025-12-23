@@ -19,6 +19,8 @@ public class MyApplication extends Application {
                 .setAdMobNativeId("ca-app-pub-3940256099942544/2247696110")
                 .setAdMobAppOpenId("ca-app-pub-3940256099942544/9257395921")
                 .enableCollapsibleBanner(true)
+                .setUseUmpConsent(true)
+                .setFrequencyCap(15)
                 .setLoadingDialogText("Loading awesome ad...")
                 .setLoadingDialogColor(android.graphics.Color.DKGRAY, android.graphics.Color.YELLOW)
                 .build();

@@ -44,6 +44,10 @@
 -keep public class com.partharoy.smartads.AdStatus { *; }
 -keep public class com.partharoy.smartads.NativeAdSize { *; }
 
+# User Messaging Platform (UMP)
+-keep class com.google.android.ump.** { *; }
+-dontwarn com.google.android.ump.**
+
 # Common attributes
 -keepattributes Signature
 -keepattributes *Annotation*

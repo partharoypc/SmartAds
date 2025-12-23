@@ -20,6 +20,10 @@
 -keep class androidx.lifecycle.** { *; }
 -dontwarn androidx.lifecycle.**
 
+# User Messaging Platform (UMP)
+-keep class com.google.android.ump.** { *; }
+-dontwarn com.google.android.ump.**
+
 # Common attributes for library stability
 -keepattributes Signature
 -keepattributes *Annotation*
