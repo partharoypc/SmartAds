@@ -48,7 +48,7 @@ Add the SmartAds library and the Google Mobile Ads SDK to your app-level `build.
 
 ```groovy
 dependencies {
-    implementation 'com.github.partharoypc:SmartAds:3.0.0' // Check JitPack for latest
+    implementation 'com.github.partharoy:SmartAds:3.0.0' // Check JitPack for latest
     implementation 'com.google.android.gms:play-services-ads:24.9.0' 
 }
 ```
