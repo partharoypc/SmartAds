@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.partharoy.smartads"
+    namespace = "com.partharoypc.smartads"
     compileSdk = 36
 
     defaultConfig {
@@ -59,9 +59,9 @@ afterEvaluate {
         publications {
             create<MavenPublication>("release") {
                 from(components["release"])
-                groupId = "com.github.partharoy"
+                groupId = "com.github.partharoypc"
                 artifactId = "SmartAds"
-                version = "3.1.0"
+                version = "4.0.0"
 
                 pom {
                     name.set("SmartAds")
