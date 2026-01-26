@@ -29,20 +29,20 @@
 -dontwarn androidx.lifecycle.**
 
 # SmartAds Library public API
--keep public class com.partharoy.smartads.* {
+-keep public class com.partharoypc.smartads.* {
     public protected *;
 }
--keep public class com.partharoy.smartads.listeners.* {
+-keep public class com.partharoypc.smartads.listeners.* {
     public protected *;
 }
--keep public class com.partharoy.smartads.managers.* {
+-keep public class com.partharoypc.smartads.managers.* {
     public protected *;
 }
--keep public class com.partharoy.smartads.ui.* {
+-keep public class com.partharoypc.smartads.ui.* {
     public protected *;
 }
--keep public class com.partharoy.smartads.AdStatus { *; }
--keep public class com.partharoy.smartads.NativeAdSize { *; }
+-keep public class com.partharoypc.smartads.AdStatus { *; }
+-keep public class com.partharoypc.smartads.NativeAdSize { *; }
 
 # User Messaging Platform (UMP)
 -keep class com.google.android.ump.** { *; }

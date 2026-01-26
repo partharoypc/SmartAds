@@ -1,0 +1,15 @@
+package com.partharoypc.smartads.listeners;
+
+import android.view.View;
+
+public interface BannerAdListener {
+    void onAdLoaded(View adView);
+
+    void onAdFailed(String errorMessage);
+
+    default void onAdClicked() {
+    }
+
+    default void onAdImpression() {
+    }
+}

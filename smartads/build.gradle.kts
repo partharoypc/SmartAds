@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.partharoy.smartads"
+    namespace = "com.partharoypc.smartads"
     compileSdk = 36
 
     defaultConfig {
