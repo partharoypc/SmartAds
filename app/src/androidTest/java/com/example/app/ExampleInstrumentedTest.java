@@ -1,4 +1,4 @@
-package com.partharoypc.smartads;
+package com.example.app;
 
 import android.content.Context;
 
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
     public void useAppContext() {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        assertEquals("com.creator.smartads.test", appContext.getPackageName());
+        assertEquals("com.creator.smartadsapp", appContext.getPackageName());
     }
 }

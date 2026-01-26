@@ -35,14 +35,14 @@
                     android:layout_height="wrap_content"
                     android:textSize="16sp"
                     android:textStyle="bold"
-                    android:textColor="@android:color/black" />
+                    android:textColor="@color/text_primary" />
 
                 <TextView
                     android:id="@+id/ad_advertiser"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textSize="14sp"
-                    android:textColor="@android:color/darker_gray" />
+                    android:textColor="@color/text_secondary" />
                     
                  <RatingBar
                     android:id="@+id/ad_stars"
@@ -55,6 +55,7 @@
             
              <Button
                 android:id="@+id/ad_call_to_action"
+                style="@style/Widget.Material3.Button.TonalButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Install" />
@@ -65,7 +66,7 @@
              android:layout_width="match_parent"
              android:layout_height="wrap_content"
              android:textSize="14sp"
-             android:textColor="@android:color/black"
+             android:textColor="@color/text_primary"
              android:layout_marginBottom="8dp"
              android:maxLines="3" 
              android:ellipsize="end"/>

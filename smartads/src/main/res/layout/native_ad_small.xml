@@ -29,7 +29,7 @@
                 android:layout_height="wrap_content"
                 android:textSize="14sp"
                 android:textStyle="bold"
-                android:textColor="@android:color/black"
+                android:textColor="@color/text_primary"
                 android:ellipsize="end"
                 android:maxLines="1" />
 
@@ -38,7 +38,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="12sp"
-                android:textColor="@android:color/darker_gray"
+                android:textColor="@color/text_secondary"
                 android:ellipsize="end"
                 android:maxLines="1" />
                 
@@ -61,6 +61,7 @@
 
         <Button
             android:id="@+id/ad_call_to_action"
+            style="@style/Widget.Material3.Button.TonalButton"
             android:layout_width="wrap_content"
             android:layout_height="40dp"
             android:textSize="12sp"

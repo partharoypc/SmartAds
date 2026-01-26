@@ -3,13 +3,13 @@ plugins {
 }
 
 android {
-    namespace = "com.partharoypc.smartadsapp"
-    compileSdk = 35
+    namespace = "com.example.app"
+    compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.partharoypc.smartadsapp"
+        applicationId = "com.example.app"
         minSdk = 23
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 

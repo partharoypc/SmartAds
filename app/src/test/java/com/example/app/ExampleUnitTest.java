@@ -1,4 +1,4 @@
-package com.partharoypc.smartads;
+package com.example.app;
 
 import org.junit.Test;
 

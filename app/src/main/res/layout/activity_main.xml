@@ -48,7 +48,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
                         android:text="SDK Initialized • Test Mode"
-                        android:textColor="#E0E7FF"
+                        android:textColor="#F0F0F0"
                         android:textSize="14sp" />
 
                 </LinearLayout>
