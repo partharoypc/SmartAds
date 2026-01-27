@@ -85,12 +85,6 @@ public class RewardedAdManager extends BaseFullScreenAdManager {
             return;
         }
 
-        if (isFrequencyCapped(com.partharoypc.smartads.SmartAds.getInstance().getConfig())) {
-            if (listener != null)
-                listener.onAdFailedToShow("Ad is frequency capped.");
-            return;
-        }
-
         if (adStatus != AdStatus.LOADED) {
             // Not loaded and not loading -> Start loading and wait
             isShowPending = true;

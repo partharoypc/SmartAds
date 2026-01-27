@@ -25,7 +25,7 @@ public class AppOpenAdManager extends BaseFullScreenAdManager
     private Activity currentActivity;
     private boolean isShowingAd = false;
     private long loadTimeMs = 0L;
-    private static final long MAX_AD_AGE_MS = 1L * 60L * 60L * 1000L; // 1 hour for high revenue freshness
+    private static final long MAX_AD_AGE_MS = 4L * 60L * 60L * 1000L; // 4 hours for AdMob recommended freshness
     private AppOpenAdListener developerListener;
 
     public AppOpenAdManager(Application application) {
