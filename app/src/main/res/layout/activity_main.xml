@@ -32,24 +32,121 @@
                     android:layout_height="wrap_content"
                     android:background="@drawable/gradient_header"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="20dp">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="SmartAds Implementation"
+                        android:text="General Settings"
                         android:textColor="@color/white"
-                        android:textSize="20sp"
-                        android:textStyle="bold" />
+                        android:textSize="22sp"
+                        android:textStyle="bold"
+                        tools:ignore="HardcodedText" />
 
                     <TextView
                         android:id="@+id/text_sdk_status"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:text="SDK Initialized • Test Mode"
+                        android:alpha="0.8"
+                        android:text="@string/status_sdk_init"
                         android:textColor="#F0F0F0"
-                        android:textSize="14sp" />
+                        android:textSize="12sp" />
+
+                    <!-- Master Switch -->
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                        android:id="@+id/switch_enable_ads"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:checked="true"
+                        android:text="Enable Ads"
+                        android:textColor="#FFFFFF"
+                        android:textSize="16sp"
+                        app:thumbTint="@color/white"
+                        app:trackTint="#80FFFFFF"
+                        tools:ignore="HardcodedText" />
+
+                    <!-- Mediation Header -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:alpha="0.7"
+                        android:text="Mediation Toggles (Runtime)"
+                        android:textAllCaps="true"
+                        android:textColor="#FFFFFF"
+                        android:textSize="10sp"
+                        android:textStyle="bold"
+                        tools:ignore="HardcodedText,SmallSp" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginTop="4dp"
+                        android:layout_marginBottom="8dp"
+                        android:alpha="0.2"
+                        android:background="#FFFFFF" />
+
+                    <!-- Mediation Switches -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/switch_mediation_facebook"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:checked="true"
+                            android:minHeight="32dp"
+                            android:text="Facebook Audience Network"
+                            android:textColor="#F0F0F0"
+                            android:textSize="14sp"
+                            app:thumbTint="@color/white"
+                            app:trackTint="#80FFFFFF"
+                            tools:ignore="HardcodedText" />
+
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/switch_mediation_applovin"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:checked="true"
+                            android:minHeight="32dp"
+                            android:text="AppLovin MAX"
+                            android:textColor="#F0F0F0"
+                            android:textSize="14sp"
+                            app:thumbTint="@color/white"
+                            app:trackTint="#80FFFFFF"
+                            tools:ignore="HardcodedText" />
+
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/switch_mediation_unity"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:checked="true"
+                            android:minHeight="32dp"
+                            android:text="Unity Ads"
+                            android:textColor="#F0F0F0"
+                            android:textSize="14sp"
+                            app:thumbTint="@color/white"
+                            app:trackTint="#80FFFFFF"
+                            tools:ignore="HardcodedText" />
+                    </LinearLayout>
+
+                    <!-- Verify Button -->
+                    <Button
+                        android:id="@+id/btn_verify_mediation"
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:layout_marginTop="8dp"
+                        android:text="Verify Configuration"
+                        android:textColor="#FFD700"
+                        app:icon="@android:drawable/ic_menu_info_details"
+                        app:iconTint="#FFD700"
+                        tools:ignore="HardcodedText" />
 
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
@@ -58,84 +155,42 @@
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
+                android:layout_marginBottom="20dp"
                 app:cardBackgroundColor="@color/surface_card"
-                app:cardCornerRadius="12dp"
+                app:cardCornerRadius="16dp"
                 app:cardElevation="2dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
+                    android:orientation="vertical">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Banner Ad"
-                        android:textColor="@color/text_primary"
-                        android:textSize="18sp"
-                        android:textStyle="bold" />
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:layout_marginTop="8dp"
-                        android:layout_marginBottom="8dp"
-                        android:background="@color/divider_color" />
-
+                    <!-- Header -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal">
+                        android:background="@drawable/gradient_header"
+                        android:gravity="center_vertical"
+                        android:padding="16dp">
 
-                        <Button
-                            android:id="@+id/btn_load_banner"
-                            style="?attr/materialButtonOutlinedStyle"
+                        <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Load" />
+                            android:text="@string/header_banner"
+                            android:textColor="@color/white"
+                            android:textSize="18sp"
+                            android:textStyle="bold" />
 
-                        <Space
-                            android:layout_width="8dp"
-                            android:layout_height="wrap_content" />
-
-                        <Button
-                            android:id="@+id/btn_load_collapsible"
-                            style="?attr/materialButtonOutlinedStyle"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="Collapsible" />
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:src="@android:drawable/ic_menu_crop"
+                            app:tint="@color/white"
+                            tools:ignore="ContentDescription" />
                     </LinearLayout>
 
-                    <FrameLayout
-                        android:id="@+id/banner_container"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:background="#F9FAFB"
-                        android:minHeight="50dp" />
-
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
-
-            <!-- Interstitial & Rewarded Row -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                android:orientation="vertical">
-
-                <!-- Interstitial -->
-                <androidx.cardview.widget.CardView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="12dp"
-                    app:cardCornerRadius="12dp"
-                    app:cardElevation="2dp">
-
+                    <!-- Content -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -145,51 +200,126 @@
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:gravity="center_vertical"
                             android:orientation="horizontal">
+
+                            <Button
+                                android:id="@+id/btn_load_banner"
+                                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginEnd="8dp"
+                                android:layout_weight="1"
+                                android:text="@string/btn_load"
+                                android:textColor="@color/colorPrimary"
+                                app:strokeColor="@color/colorPrimary" />
+
+                            <Button
+                                android:id="@+id/btn_load_collapsible"
+                                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="8dp"
+                                android:layout_weight="1"
+                                android:text="@string/btn_collapsible"
+                                android:textColor="@color/colorPrimary"
+                                app:strokeColor="@color/colorPrimary" />
+                        </LinearLayout>
+
+                        <FrameLayout
+                            android:id="@+id/banner_container"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            android:background="#F9FAFB" />
+                    </LinearLayout>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Interstitial & Rewarded Row -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="20dp"
+                android:orientation="vertical">
+
+                <!-- Interstitial -->
+                <androidx.cardview.widget.CardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="2dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/gradient_header"
+                            android:gravity="center_vertical"
+                            android:padding="16dp">
 
                             <TextView
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:text="Interstitial Ad"
-                                android:textColor="@color/text_primary"
-                                android:textSize="16sp"
+                                android:text="@string/header_interstitial"
+                                android:textColor="@color/white"
+                                android:textSize="18sp"
                                 android:textStyle="bold" />
 
                             <TextView
                                 android:id="@+id/status_interstitial"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Not Loaded"
-                                android:textColor="@color/text_secondary"
-                                android:textSize="12sp" />
+                                android:background="@drawable/rounded_status_bg"
+                                android:backgroundTint="#20FFFFFF"
+                                android:paddingHorizontal="10dp"
+                                android:paddingVertical="4dp"
+                                android:text="@string/label_not_loaded"
+                                android:textColor="@color/white"
+                                android:textSize="12sp"
+                                android:textStyle="bold" />
                         </LinearLayout>
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp">
+                            android:orientation="vertical"
+                            android:padding="20dp">
 
-                            <Button
-                                android:id="@+id/btn_load_interstitial"
-                                style="?attr/materialButtonOutlinedStyle"
-                                android:layout_width="0dp"
+                            <LinearLayout
+                                android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:text="Load" />
+                                android:layout_marginTop="0dp"
+                                tools:ignore="UselessParent">
 
-                            <Space
-                                android:layout_width="8dp"
-                                android:layout_height="wrap_content" />
+                                <Button
+                                    android:id="@+id/btn_load_interstitial"
+                                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginEnd="8dp"
+                                    android:layout_weight="1"
+                                    android:text="@string/btn_load"
+                                    android:textColor="@color/colorPrimary"
+                                    app:strokeColor="@color/colorPrimary" />
 
-                            <Button
-                                android:id="@+id/btn_show_interstitial"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:enabled="false"
-                                android:text="Show" />
+                                <Button
+                                    android:id="@+id/btn_show_interstitial"
+                                    style="@style/Widget.MaterialComponents.Button"
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginStart="8dp"
+                                    android:layout_weight="1"
+                                    android:backgroundTint="@color/colorPrimary"
+                                    android:enabled="false"
+                                    android:text="@string/btn_show"
+                                    android:textColor="@android:color/white" />
+                            </LinearLayout>
                         </LinearLayout>
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
@@ -198,63 +328,79 @@
                 <androidx.cardview.widget.CardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:cardCornerRadius="12dp"
+                    app:cardCornerRadius="16dp"
                     app:cardElevation="2dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="16dp">
+                        android:orientation="vertical">
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:background="@drawable/gradient_header"
                             android:gravity="center_vertical"
-                            android:orientation="horizontal">
+                            android:padding="16dp">
 
                             <TextView
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:text="Rewarded Ad"
-                                android:textColor="@color/text_primary"
-                                android:textSize="16sp"
+                                android:text="@string/header_rewarded"
+                                android:textColor="@color/white"
+                                android:textSize="18sp"
                                 android:textStyle="bold" />
 
                             <TextView
                                 android:id="@+id/status_rewarded"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Not Loaded"
-                                android:textColor="@color/text_secondary"
-                                android:textSize="12sp" />
+                                android:background="@drawable/rounded_status_bg"
+                                android:backgroundTint="#20FFFFFF"
+                                android:paddingHorizontal="10dp"
+                                android:paddingVertical="4dp"
+                                android:text="@string/label_not_loaded"
+                                android:textColor="@color/white"
+                                android:textSize="12sp"
+                                android:textStyle="bold" />
                         </LinearLayout>
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp">
+                            android:orientation="vertical"
+                            android:padding="20dp">
 
-                            <Button
-                                android:id="@+id/btn_load_rewarded"
-                                style="?attr/materialButtonOutlinedStyle"
-                                android:layout_width="0dp"
+                            <LinearLayout
+                                android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:text="Load" />
+                                android:layout_marginTop="0dp"
+                                tools:ignore="UselessParent">
 
-                            <Space
-                                android:layout_width="8dp"
-                                android:layout_height="wrap_content" />
+                                <Button
+                                    android:id="@+id/btn_load_rewarded"
+                                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginEnd="8dp"
+                                    android:layout_weight="1"
+                                    android:text="@string/btn_load"
+                                    android:textColor="@color/colorPrimary"
+                                    app:strokeColor="@color/colorPrimary" />
 
-                            <Button
-                                android:id="@+id/btn_show_rewarded"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:enabled="false"
-                                android:text="Show" />
+                                <Button
+                                    android:id="@+id/btn_show_rewarded"
+                                    style="@style/Widget.MaterialComponents.Button"
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginStart="8dp"
+                                    android:layout_weight="1"
+                                    android:backgroundTint="@color/colorSecondary"
+                                    android:enabled="false"
+                                    android:text="@string/btn_show"
+                                    android:textColor="@android:color/white" />
+                            </LinearLayout>
                         </LinearLayout>
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
@@ -266,55 +412,69 @@
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                app:cardCornerRadius="12dp"
+                android:layout_marginBottom="20dp"
+                app:cardCornerRadius="16dp"
                 app:cardElevation="2dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
+                    android:orientation="vertical">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:background="@drawable/gradient_header"
                         android:gravity="center_vertical"
-                        android:orientation="horizontal">
+                        android:padding="16dp">
 
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="App Open Ad (Manual)"
-                            android:textColor="@color/text_primary"
-                            android:textSize="16sp"
+                            android:text="@string/header_app_open"
+                            android:textColor="@color/white"
+                            android:textSize="18sp"
                             android:textStyle="bold" />
 
                         <TextView
                             android:id="@+id/status_app_open"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Not Loaded"
+                            android:background="@drawable/rounded_status_bg"
+                            android:backgroundTint="#20FFFFFF"
+                            android:paddingHorizontal="10dp"
+                            android:paddingVertical="4dp"
+                            android:text="@string/label_not_loaded"
+                            android:textColor="@color/white"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="20dp">
+
+                        <Button
+                            android:id="@+id/btn_show_app_open"
+                            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="0dp"
+                            android:text="@string/btn_show_app_open"
+                            android:textColor="@color/colorPrimary"
+                            app:strokeColor="@color/colorPrimary" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            android:text="@string/note_app_open"
                             android:textColor="@color/text_secondary"
                             android:textSize="12sp" />
                     </LinearLayout>
-
-                    <Button
-                        android:id="@+id/btn_show_app_open"
-                        style="?attr/materialButtonOutlinedStyle"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="Show App Open Ad" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="Note: Also shows automatically on app resume."
-                        android:textColor="@color/text_secondary"
-                        android:textSize="10sp" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
@@ -322,90 +482,123 @@
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
+                android:layout_marginBottom="20dp"
                 app:cardBackgroundColor="@color/surface_card"
-                app:cardCornerRadius="12dp"
+                app:cardCornerRadius="16dp"
                 app:cardElevation="2dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Native Ad"
-                        android:textColor="@color/text_primary"
-                        android:textSize="18sp"
-                        android:textStyle="bold" />
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:layout_marginTop="8dp"
-                        android:layout_marginBottom="8dp"
-                        android:background="@color/divider_color" />
-
-                    <RadioGroup
-                        android:id="@+id/radio_group_native_size"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:orientation="horizontal">
-
-                        <RadioButton
-                            android:id="@+id/rb_small"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Small" />
-
-                        <Space
-                            android:layout_width="16dp"
-                            android:layout_height="wrap_content" />
-
-                        <RadioButton
-                            android:id="@+id/rb_medium"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:checked="true"
-                            android:text="Medium" />
-
-                        <Space
-                            android:layout_width="16dp"
-                            android:layout_height="wrap_content" />
-
-                        <RadioButton
-                            android:id="@+id/rb_large"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Large" />
-                    </RadioGroup>
+                    android:orientation="vertical">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:orientation="horizontal">
+                        android:background="@drawable/gradient_header"
+                        android:gravity="center_vertical"
+                        android:padding="16dp">
 
-                        <Button
-                            android:id="@+id/btn_load_native"
-                            style="?attr/materialButtonOutlinedStyle"
+                        <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Load Native" />
+                            android:text="@string/header_native"
+                            android:textColor="@color/white"
+                            android:textSize="18sp"
+                            android:textStyle="bold" />
+
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:src="@android:drawable/ic_menu_crop"
+                            app:tint="@color/white"
+                            tools:ignore="ContentDescription" />
                     </LinearLayout>
 
-                    <FrameLayout
-                        android:id="@+id/native_container"
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:background="#F9FAFB"
-                        android:minHeight="100dp" />
+                        android:animateLayoutChanges="true"
+                        android:orientation="vertical"
+                        android:padding="16dp">
 
+                        <HorizontalScrollView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:scrollbars="none">
+
+                            <RadioGroup
+                                android:id="@+id/radio_group_native_size"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:gravity="center"
+                                android:orientation="horizontal">
+
+                                <RadioButton
+                                    android:id="@+id/rb_small"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:buttonTint="@color/colorPrimary"
+                                    android:text="@string/size_small" />
+
+                                <Space
+                                    android:layout_width="16dp"
+                                    android:layout_height="wrap_content" />
+
+                                <RadioButton
+                                    android:id="@+id/rb_medium"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:buttonTint="@color/colorPrimary"
+                                    android:checked="true"
+                                    android:text="@string/size_medium" />
+
+                                <Space
+                                    android:layout_width="16dp"
+                                    android:layout_height="wrap_content" />
+
+                                <RadioButton
+                                    android:id="@+id/rb_large"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:buttonTint="@color/colorPrimary"
+                                    android:text="@string/size_large" />
+
+                                <Space
+                                    android:layout_width="16dp"
+                                    android:layout_height="wrap_content" />
+
+                                <RadioButton
+                                    android:id="@+id/rb_custom"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:buttonTint="@color/colorPrimary"
+                                    android:text="Custom"
+                                    tools:ignore="HardcodedText" />
+                            </RadioGroup>
+                        </HorizontalScrollView>
+
+
+                        <Button
+                            android:id="@+id/btn_load_native"
+                            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            android:text="@string/btn_load_native"
+                            android:textColor="@color/colorPrimary"
+                            app:strokeColor="@color/colorPrimary" />
+
+                        <FrameLayout
+                            android:id="@+id/native_container"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            android:background="#F9FAFB"
+                            android:minHeight="100dp" />
+
+                    </LinearLayout>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
@@ -413,55 +606,73 @@
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                app:cardCornerRadius="12dp"
+                android:layout_marginBottom="24dp"
+                app:cardCornerRadius="16dp"
                 app:cardElevation="2dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Debug Utilities"
-                        android:textColor="@color/text_primary"
-                        android:textSize="18sp"
-                        android:textStyle="bold" />
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:layout_marginTop="8dp"
-                        android:layout_marginBottom="8dp"
-                        android:background="@color/divider_color" />
+                    android:orientation="vertical">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal">
+                        android:background="@drawable/gradient_header"
+                        android:gravity="center_vertical"
+                        android:padding="16dp">
 
-                        <Button
-                            android:id="@+id/btn_ad_inspector"
-                            style="?attr/materialButtonOutlinedStyle"
+                        <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Ad Inspector" />
+                            android:text="@string/header_debug"
+                            android:textColor="@color/white"
+                            android:textSize="18sp"
+                            android:textStyle="bold" />
 
-                        <Space
-                            android:layout_width="8dp"
-                            android:layout_height="wrap_content" />
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:src="@android:drawable/ic_menu_agenda"
+                            app:tint="@color/white"
+                            tools:ignore="ContentDescription" />
+                    </LinearLayout>
 
-                        <Button
-                            android:id="@+id/btn_privacy_options"
-                            style="?attr/materialButtonOutlinedStyle"
-                            android:layout_width="0dp"
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="20dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="Privacy Options" />
+                            android:orientation="horizontal"
+                            tools:ignore="UselessParent">
+
+                            <Button
+                                android:id="@+id/btn_ad_inspector"
+                                style="@style/Widget.MaterialComponents.Button.TextButton"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/btn_ad_inspector"
+                                android:textColor="@color/text_secondary" />
+
+                            <Space
+                                android:layout_width="8dp"
+                                android:layout_height="wrap_content" />
+
+                            <Button
+                                android:id="@+id/btn_privacy_options"
+                                style="@style/Widget.MaterialComponents.Button.TextButton"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/btn_privacy"
+                                android:textColor="@color/text_secondary" />
+                        </LinearLayout>
                     </LinearLayout>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
@@ -471,49 +682,73 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="32dp"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="2dp">
+                app:cardCornerRadius="16dp"
+                app:cardElevation="2dp"
+                tools:ignore="TooManyViews">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
+                    android:orientation="vertical">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Live Event Log"
-                        android:textColor="@color/text_primary"
-                        android:textSize="16sp"
-                        android:textStyle="bold" />
-
-                    <ScrollView
+                    <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="120dp"
-                        android:layout_marginTop="8dp"
-                        android:background="#F3F4F6"
-                        android:fillViewport="true">
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/gradient_header"
+                        android:gravity="center_vertical"
+                        android:padding="16dp">
 
                         <TextView
-                            android:id="@+id/text_logger"
-                            android:layout_width="match_parent"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:fontFamily="monospace"
-                            android:padding="8dp"
-                            android:text="> App started...\n"
-                            android:textColor="#374151"
-                            android:textSize="12sp" />
-                    </ScrollView>
+                            android:layout_weight="1"
+                            android:text="@string/header_logs"
+                            android:textColor="@color/white"
+                            android:textSize="18sp"
+                            android:textStyle="bold" />
 
-                    <Button
-                        android:id="@+id/btn_clear_log"
-                        style="?attr/borderlessButtonStyle"
-                        android:layout_width="wrap_content"
+                        <Button
+                            android:id="@+id/btn_clear_log"
+                            style="@style/Widget.MaterialComponents.Button.TextButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:minWidth="0dp"
+                            android:paddingHorizontal="10dp"
+                            android:paddingVertical="4dp"
+                            android:text="@string/btn_clear_logs"
+                            android:textColor="@color/white"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="end"
-                        android:text="Clear Logs"
-                        android:textColor="@color/red_error" />
+                        android:orientation="vertical"
+                        android:padding="20dp">
+
+                        <ScrollView
+                            android:layout_width="match_parent"
+                            android:layout_height="140dp"
+                            android:layout_marginTop="12dp"
+                            android:background="@drawable/rounded_log_bg"
+                            android:fillViewport="true"
+                            android:requiresFadingEdge="vertical"
+                            tools:ignore="UselessParent">
+
+                            <TextView
+                                android:id="@+id/text_logger"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="monospace"
+                                android:lineSpacingExtra="2dp"
+                                android:padding="12dp"
+                                android:text="@string/log_initial"
+                                android:textColor="#A3E635"
+                                android:textSize="11sp" />
+                        </ScrollView>
+
+                    </LinearLayout>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
@@ -521,34 +756,65 @@
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="32dp"
-                app:cardCornerRadius="12dp"
+                android:layout_marginBottom="40dp"
+                app:cardBackgroundColor="#1F2937"
+                app:cardCornerRadius="16dp"
                 app:cardElevation="2dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
+                    android:orientation="vertical">
 
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Developer Information"
-                        android:textColor="@color/text_primary"
-                        android:textSize="16sp"
-                        android:textStyle="bold" />
+                        android:background="@drawable/gradient_header"
+                        android:gravity="center"
+                        android:padding="16dp">
 
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/header_dev_info"
+                            android:textColor="@color/white"
+                            android:textSize="18sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
 
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Name :- Partha Roy"
-                        android:textColor="@color/text_primary"
-                        android:textSize="16sp"
-                        android:layout_marginVertical="10dp"/>
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:padding="24dp">
 
+                        <View
+                            android:layout_width="40dp"
+                            android:layout_height="2dp"
+                            android:layout_marginTop="12dp"
+                            android:layout_marginBottom="12dp"
+                            android:background="#374151" />
 
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/dev_name_label"
+                            android:textColor="#9CA3AF"
+                            android:textSize="14sp" />
+
+                        <Button
+                            android:id="@+id/btn_test_suite"
+                            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="16dp"
+                            android:text="Open Mediation Suite"
+                            android:textColor="#9CA3AF"
+                            app:strokeColor="#374151"
+                            tools:ignore="HardcodedText" />
+
+                    </LinearLayout>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 

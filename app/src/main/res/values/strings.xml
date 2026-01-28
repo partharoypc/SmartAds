@@ -1,5 +1,42 @@
 <resources>
-    <string name="app_name">Smart Ads App</string>
-    <string name="admob_app_id">ca-app-pub-3940256099942544~3347511713</string> <!-- test -->
+    <string name="app_name">Smart Ads Demo</string>
+    <string name="admob_app_id">ca-app-pub-3940256099942544~3347511713</string>
+
+    <!-- Headers -->
+    <string name="header_implementation">SmartAds Implementation</string>
+    <string name="status_sdk_init">SDK Initialized • Test Mode</string>
+    <string name="header_banner">Banner Ad</string>
+    <string name="header_interstitial">Interstitial Ad</string>
+    <string name="header_rewarded">Rewarded Ad</string>
+    <string name="header_app_open">App Open Ad (Manual)</string>
+    <string name="header_native">Native Ad</string>
+    <string name="header_debug">Debug Utilities</string>
+    <string name="header_logs">Live Event Log</string>
+    <string name="header_dev_info">Developer Information</string>
+
+    <!-- Labels & Status -->
+    <string name="label_not_loaded">Not Loaded</string>
+    <string name="note_app_open">Note: Also shows automatically on app resume.</string>
+    <string name="dev_name_label">Name :- Partha Roy</string>
+
+    <!-- Buttons -->
+    <string name="btn_load">Load</string>
+    <string name="btn_show">Show</string>
+    <string name="btn_collapsible">Collapsible</string>
+    <string name="btn_show_app_open">Show App Open Ad</string>
+    <string name="btn_load_native">Load Native</string>
+    <string name="btn_ad_inspector">Ad Inspector</string>
+    <string name="btn_privacy">Privacy Options</string>
+    <string name="btn_clear_logs">Clear Logs</string>
+    <string name="btn_toggle_ads">Toggle Ads</string>
+    <string name="btn_verify_mediation">Verify Mediation</string>
+
+    <!-- Native Size -->
+    <string name="size_small">Small</string>
+    <string name="size_medium">Medium</string>
+    <string name="size_large">Large</string>
+
+    <!-- Log Initial -->
+    <string name="log_initial">> App started...\n</string>
 
 </resources>

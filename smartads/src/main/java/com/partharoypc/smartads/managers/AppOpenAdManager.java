@@ -15,8 +15,14 @@ import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.appopen.AppOpenAd;
 import com.partharoypc.smartads.AdStatus;
 import com.partharoypc.smartads.SmartAds;
+import com.partharoypc.smartads.SmartAdsLogger;
 import com.partharoypc.smartads.TestAdIds;
+import com.partharoypc.smartads.house.HouseAd;
+import com.partharoypc.smartads.house.HouseAdLoader;
+import com.partharoypc.smartads.house.HouseInterstitialActivity;
 import com.partharoypc.smartads.listeners.AppOpenAdListener;
+
+import java.util.List;
 
 public class AppOpenAdManager extends BaseFullScreenAdManager
         implements DefaultLifecycleObserver, Application.ActivityLifecycleCallbacks {
@@ -25,7 +31,7 @@ public class AppOpenAdManager extends BaseFullScreenAdManager
     private Activity currentActivity;
     private boolean isShowingAd = false;
     private long loadTimeMs = 0L;
-    private static final long MAX_AD_AGE_MS = 4L * 60L * 60L * 1000L; // 4 hours for AdMob recommended freshness
+    private static final long MAX_AD_AGE_MS = 4L * 60L * 60L * 1000L;
     private AppOpenAdListener developerListener;
 
     public AppOpenAdManager(Application application) {
@@ -50,27 +56,59 @@ public class AppOpenAdManager extends BaseFullScreenAdManager
         }
     }
 
+    private boolean isHouseAdReady = false;
+    private HouseAd selectedHouseAd;
+    private int selectedHouseAdIndex = -1;
+
     public void fetchAd() {
-        if (appOpenAd != null && isAdFresh()) {
+        if ((appOpenAd != null && isAdFresh()) || (isHouseAdReady && selectedHouseAd != null)) {
+            SmartAdsLogger.d("App Open Ad is already fresh/ready. Skipping fetch.");
             return;
         }
         if (isLoading) {
+            SmartAdsLogger.d("App Open Ad is currently loading. Skipping fetch.");
             return;
         }
         isLoading = true;
         adStatus = AdStatus.LOADING;
+        isHouseAdReady = false;
+        selectedHouseAd = null;
+
+        SmartAdsLogger.d("Fetching App Open Ad...");
 
         AppOpenAd.AppOpenAdLoadCallback loadCallback = new AppOpenAd.AppOpenAdLoadCallback() {
             @Override
             public void onAdLoaded(@NonNull AppOpenAd ad) {
+                SmartAdsLogger.d("✅ App Open Ad LOADED.");
                 AppOpenAdManager.this.appOpenAd = ad;
                 loadTimeMs = System.currentTimeMillis();
+
+                ad.setOnPaidEventListener(adValue -> {
+                    SmartAds.getInstance().reportPaidEvent(adValue, ad.getResponseInfo(),
+                            SmartAds.getInstance().getConfig().getAdMobAppOpenId(), "App Open");
+                });
+
                 onAdLoadedBase();
             }
 
             @Override
             public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                SmartAdsLogger.e("❌ App Open Ad Failed to Load: " + loadAdError.getMessage());
+                // FALLBACK TO HOUSE AD
+                if (SmartAds.getInstance().getConfig().isHouseAdsEnabled()) {
+                    List<HouseAd> houseAds = SmartAds.getInstance().getConfig().getHouseAds();
+                    selectedHouseAd = HouseAdLoader.selectAd(houseAds);
+                    if (selectedHouseAd != null) {
+                        SmartAdsLogger.d("Fallback to House App Open Ad.");
+                        selectedHouseAdIndex = houseAds.indexOf(selectedHouseAd);
+                        isHouseAdReady = true;
+                        onAdLoadedBase();
+                        return;
+                    }
+                }
+
                 onAdFailedToLoadBase();
+                // Only retry if not house ad either
                 scheduleRetry(application, null, AppOpenAdManager.this::fetchAd);
             }
         };
@@ -78,6 +116,18 @@ public class AppOpenAdManager extends BaseFullScreenAdManager
                 : SmartAds.getInstance().getConfig().getAdMobAppOpenId();
 
         if (adUnitId == null || adUnitId.isEmpty()) {
+            if (SmartAds.getInstance().getConfig().isHouseAdsEnabled()) {
+                SmartAdsLogger.d("AdMob App Open ID not set. Trying House Ad.");
+                List<HouseAd> houseAds = SmartAds.getInstance().getConfig().getHouseAds();
+                selectedHouseAd = HouseAdLoader.selectAd(houseAds);
+                if (selectedHouseAd != null) {
+                    selectedHouseAdIndex = houseAds.indexOf(selectedHouseAd);
+                    isHouseAdReady = true;
+                    onAdLoadedBase();
+                    return;
+                }
+            }
+
             isLoading = false;
             adStatus = AdStatus.FAILED;
             return;
@@ -88,57 +138,107 @@ public class AppOpenAdManager extends BaseFullScreenAdManager
     }
 
     public void showAdIfAvailable() {
+        if (currentActivity == null || SmartAds.getInstance().isAnyAdShowing()) {
+            return;
+        }
 
-        if (!isShowingAd && appOpenAd != null && isAdFresh() && currentActivity != null
-                && !currentActivity.isFinishing() && !currentActivity.isDestroyed()
-                && !SmartAds.getInstance().isAnyAdShowing()) {
+        // Prevent showing ad on top of House Ad Activity or if already showing
+        if (isShowingAd || currentActivity instanceof HouseInterstitialActivity) {
+            return;
+        }
 
-            FullScreenContentCallback fullScreenContentCallback = new FullScreenContentCallback() {
-                @Override
-                public void onAdDismissedFullScreenContent() {
-                    AppOpenAdManager.this.appOpenAd = null;
-                    isShowingAd = false;
-                    fetchAd();
-                }
-
-                @Override
-                public void onAdShowedFullScreenContent() {
-                    isShowingAd = true;
-                    adStatus = AdStatus.SHOWN;
-                }
-
-                @Override
-                public void onAdFailedToShowFullScreenContent(@NonNull com.google.android.gms.ads.AdError adError) {
-                    AppOpenAdManager.this.appOpenAd = null;
-                    isShowingAd = false;
-                    fetchAd();
-                }
-
-                @Override
-                public void onAdImpression() {
-                    if (developerListener != null) {
-                        developerListener.onAdImpression();
-                    }
-                }
-
-                @Override
-                public void onAdClicked() {
-                    if (developerListener != null) {
-                        developerListener.onAdClicked();
-                    }
-                }
-            };
-            appOpenAd.setFullScreenContentCallback(fullScreenContentCallback);
-            appOpenAd.show(currentActivity);
+        if (appOpenAd != null && isAdFresh()) {
+            SmartAdsLogger.d("Showing AdMob App Open Ad.");
+            showAdMobAppOpen();
+        } else if (isHouseAdReady && selectedHouseAd != null) {
+            SmartAdsLogger.d("Showing House App Open Ad.");
+            showHouseAppOpen();
         } else {
-            if (appOpenAd == null || !isAdFresh()) {
+            SmartAdsLogger.d("App Open Ad not ready. Fetching new one.");
+            fetchAd();
+        }
+    }
+
+    private void showAdMobAppOpen() {
+        isShowingAd = true;
+        FullScreenContentCallback fullScreenContentCallback = new FullScreenContentCallback() {
+            @Override
+            public void onAdDismissedFullScreenContent() {
+                SmartAdsLogger.d("App Open Ad Dismissed.");
+                AppOpenAdManager.this.appOpenAd = null;
+                isShowingAd = false;
                 fetchAd();
             }
-        }
+
+            @Override
+            public void onAdShowedFullScreenContent() {
+                SmartAdsLogger.d("App Open Ad Shown.");
+                isShowingAd = true;
+                adStatus = AdStatus.SHOWN;
+            }
+
+            @Override
+            public void onAdFailedToShowFullScreenContent(@NonNull com.google.android.gms.ads.AdError adError) {
+                SmartAdsLogger.e("App Open Ad Failed to Show: " + adError.getMessage());
+                AppOpenAdManager.this.appOpenAd = null;
+                isShowingAd = false;
+                fetchAd();
+            }
+
+            @Override
+            public void onAdImpression() {
+                if (developerListener != null) {
+                    developerListener.onAdImpression();
+                }
+            }
+
+            @Override
+            public void onAdClicked() {
+                if (developerListener != null) {
+                    developerListener.onAdClicked();
+                }
+            }
+        };
+        appOpenAd.setFullScreenContentCallback(fullScreenContentCallback);
+        appOpenAd.show(currentActivity);
+    }
+
+    private void showHouseAppOpen() {
+        isShowingAd = true;
+        HouseInterstitialActivity.start(currentActivity, selectedHouseAdIndex,
+                new HouseInterstitialActivity.HouseInterstitialListener() {
+                    @Override
+                    public void onAdDismissed() {
+                        SmartAdsLogger.d("House App Open Ad Dismissed.");
+                        isShowingAd = false;
+                        isHouseAdReady = false;
+                        selectedHouseAd = null;
+                        if (developerListener != null)
+                            developerListener.onAdDismissed();
+                        fetchAd();
+                    }
+
+                    @Override
+                    public void onAdClicked() {
+                        if (developerListener != null)
+                            developerListener.onAdClicked();
+                    }
+
+                    @Override
+                    public void onAdImpression() {
+                        adStatus = AdStatus.SHOWN;
+                        if (developerListener != null)
+                            developerListener.onAdImpression();
+                    }
+                });
     }
 
     private boolean isAdFresh() {
         return appOpenAd != null && (System.currentTimeMillis() - loadTimeMs) < MAX_AD_AGE_MS;
+    }
+
+    public boolean isAdAvailable() {
+        return (appOpenAd != null && isAdFresh()) || (isHouseAdReady && selectedHouseAd != null);
     }
 
     @Override
@@ -147,12 +247,16 @@ public class AppOpenAdManager extends BaseFullScreenAdManager
 
     @Override
     public void onActivityStarted(@NonNull Activity activity) {
-        currentActivity = activity;
+        if (!(activity instanceof HouseInterstitialActivity)) {
+            currentActivity = activity;
+        }
     }
 
     @Override
     public void onActivityResumed(@NonNull Activity activity) {
-        currentActivity = activity;
+        if (!(activity instanceof HouseInterstitialActivity)) {
+            currentActivity = activity;
+        }
     }
 
     @Override

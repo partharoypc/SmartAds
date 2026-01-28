@@ -1,32 +1,53 @@
 package com.partharoypc.smartads;
 
 import com.google.android.gms.ads.RequestConfiguration;
+import com.partharoypc.smartads.house.HouseAd;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class SmartAdsConfig {
-    // Ad Unit IDs (minimal set)
+    // Ad Unit IDs
     private final String adMobAppOpenId;
     private final String adMobBannerId;
     private final String adMobInterstitialId;
     private final String adMobRewardedId;
     private final String adMobNativeId;
 
-    // Basic settings
+    // Flags
     private final boolean adsEnabled;
     private final boolean isTestMode;
+    private final boolean isLoggingEnabled;
     private final boolean collapsibleBannerEnabled;
     private final boolean useUmpConsent;
+    private final boolean houseAdsEnabled;
 
-    // Targeting
+    // Mediation Flags
+    private final boolean facebookMediationEnabled;
+    private final boolean appLovinMediationEnabled;
+    private final boolean unityMediationEnabled;
+
+    // Targeting & Limits
     private final String maxAdContentRating;
     private final int tagForChildDirectedTreatment;
     private final int tagForUnderAgeOfConsent;
+    private final long frequencyCapSeconds;
 
-    // Dialog Styling
+    // UI Customization
     private final Integer dialogBackgroundColor;
     private final Integer dialogTextColor;
     private final String dialogText;
-    private final long frequencyCapSeconds;
-    private final java.util.List<String> testDeviceIds;
+
+    // Testing & House Ads
+    private final List<String> testDeviceIds;
+    private final List<HouseAd> houseAds;
+
+    /**
+     * Creates a Builder populated with the current configuration.
+     */
+    public Builder toBuilder() {
+        return new Builder(this);
+    }
 
     private SmartAdsConfig(Builder builder) {
         this.adMobAppOpenId = builder.adMobAppOpenId;
@@ -34,21 +55,35 @@ public class SmartAdsConfig {
         this.adMobInterstitialId = builder.adMobInterstitialId;
         this.adMobRewardedId = builder.adMobRewardedId;
         this.adMobNativeId = builder.adMobNativeId;
+
         this.adsEnabled = builder.adsEnabled;
         this.isTestMode = builder.isTestMode;
+        this.isLoggingEnabled = builder.isLoggingEnabled;
         this.collapsibleBannerEnabled = builder.collapsibleBannerEnabled;
         this.useUmpConsent = builder.useUmpConsent;
-        this.dialogBackgroundColor = builder.dialogBackgroundColor;
-        this.dialogTextColor = builder.dialogTextColor;
-        this.dialogText = builder.dialogText;
-        this.frequencyCapSeconds = builder.frequencyCapSeconds;
-        this.testDeviceIds = java.util.Collections.unmodifiableList(new java.util.ArrayList<>(builder.testDeviceIds));
+        this.houseAdsEnabled = builder.houseAdsEnabled;
+
+        this.facebookMediationEnabled = builder.facebookMediationEnabled;
+        this.appLovinMediationEnabled = builder.applovinMediationEnabled;
+        this.unityMediationEnabled = builder.unityMediationEnabled;
+
         this.maxAdContentRating = builder.maxAdContentRating;
         this.tagForChildDirectedTreatment = builder.tagForChildDirectedTreatment;
         this.tagForUnderAgeOfConsent = builder.tagForUnderAgeOfConsent;
+        this.frequencyCapSeconds = builder.frequencyCapSeconds;
+
+        this.dialogBackgroundColor = builder.dialogBackgroundColor;
+        this.dialogTextColor = builder.dialogTextColor;
+        this.dialogText = builder.dialogText;
+
+        this.testDeviceIds = List.copyOf(builder.testDeviceIds);
+        this.houseAds = List.copyOf(builder.houseAds);
     }
 
-    // Getters
+    // =============================================================================================
+    // GETTERS
+    // =============================================================================================
+
     public String getAdMobAppOpenId() {
         return adMobAppOpenId;
     }
@@ -77,6 +112,10 @@ public class SmartAdsConfig {
         return isTestMode;
     }
 
+    public boolean isLoggingEnabled() {
+        return isLoggingEnabled;
+    }
+
     public boolean isCollapsibleBannerEnabled() {
         return collapsibleBannerEnabled;
     }
@@ -85,20 +124,20 @@ public class SmartAdsConfig {
         return useUmpConsent;
     }
 
-    public Integer getDialogBackgroundColor() {
-        return dialogBackgroundColor;
+    public boolean isHouseAdsEnabled() {
+        return houseAdsEnabled;
     }
 
-    public Integer getDialogTextColor() {
-        return dialogTextColor;
+    public boolean isFacebookMediationEnabled() {
+        return facebookMediationEnabled;
     }
 
-    public String getDialogText() {
-        return dialogText;
+    public boolean isAppLovinMediationEnabled() {
+        return appLovinMediationEnabled;
     }
 
-    public java.util.List<String> getTestDeviceIds() {
-        return testDeviceIds;
+    public boolean isUnityMediationEnabled() {
+        return unityMediationEnabled;
     }
 
     public String getMaxAdContentRating() {
@@ -116,6 +155,30 @@ public class SmartAdsConfig {
     public long getFrequencyCapSeconds() {
         return frequencyCapSeconds;
     }
+
+    public Integer getDialogBackgroundColor() {
+        return dialogBackgroundColor;
+    }
+
+    public Integer getDialogTextColor() {
+        return dialogTextColor;
+    }
+
+    public String getDialogText() {
+        return dialogText;
+    }
+
+    public List<String> getTestDeviceIds() {
+        return testDeviceIds;
+    }
+
+    public List<HouseAd> getHouseAds() {
+        return houseAds;
+    }
+
+    // =============================================================================================
+    // HELPER METHODS
+    // =============================================================================================
 
     public boolean isAppOpenConfigured() {
         return adMobAppOpenId != null && !adMobAppOpenId.isEmpty();
@@ -138,48 +201,90 @@ public class SmartAdsConfig {
     }
 
     public boolean isAnyAdConfigured() {
-        return isAppOpenConfigured() || isBannerConfigured() || isInterstitialConfigured() || isRewardedConfigured()
-                || isNativeConfigured();
+        return isAppOpenConfigured() || isBannerConfigured() || isInterstitialConfigured() ||
+                isRewardedConfigured() || isNativeConfigured();
     }
 
+    // =============================================================================================
+    // BUILDER
+    // =============================================================================================
+
     public static class Builder {
+        // IDs
         private String adMobAppOpenId = "";
         private String adMobBannerId = "";
         private String adMobInterstitialId = "";
         private String adMobRewardedId = "";
         private String adMobNativeId = "";
 
+        // Flags (All Defaulted to FALSE)
         private boolean adsEnabled = false;
         private boolean isTestMode = false;
+        private boolean isLoggingEnabled = false;
         private boolean collapsibleBannerEnabled = false;
         private boolean useUmpConsent = false;
-        private Integer dialogBackgroundColor = null;
-        private Integer dialogTextColor = null;
-        private String dialogText = "Loading Ad...";
-        private long frequencyCapSeconds = 30; // 30 seconds default cap
-        private java.util.List<String> testDeviceIds = new java.util.ArrayList<>();
+        private boolean houseAdsEnabled = false;
 
-        // Defaults
+        // Mediation Flags
+        private boolean facebookMediationEnabled = false;
+        private boolean applovinMediationEnabled = false;
+        private boolean unityMediationEnabled = false;
+
+        // Targeting
         private String maxAdContentRating = RequestConfiguration.MAX_AD_CONTENT_RATING_G;
         private int tagForChildDirectedTreatment = RequestConfiguration.TAG_FOR_CHILD_DIRECTED_TREATMENT_UNSPECIFIED;
         private int tagForUnderAgeOfConsent = RequestConfiguration.TAG_FOR_UNDER_AGE_OF_CONSENT_UNSPECIFIED;
 
-        public Builder setLoadingDialogColor(@androidx.annotation.ColorInt int backgroundColor,
-                @androidx.annotation.ColorInt int textColor) {
-            this.dialogBackgroundColor = backgroundColor;
-            this.dialogTextColor = textColor;
-            return this;
+        // Limits
+        private long frequencyCapSeconds = 30;
+
+        // UI
+        private Integer dialogBackgroundColor = null;
+        private Integer dialogTextColor = null;
+        private String dialogText = "Loading Ad...";
+
+        // Lists
+        private final List<String> testDeviceIds = new ArrayList<>();
+        private List<HouseAd> houseAds = new ArrayList<>();
+
+        public Builder() {
         }
 
-        public Builder setLoadingDialogText(String text) {
-            this.dialogText = text;
-            return this;
+        /**
+         * Copy constructor.
+         */
+        public Builder(SmartAdsConfig config) {
+            this.adMobAppOpenId = config.adMobAppOpenId;
+            this.adMobBannerId = config.adMobBannerId;
+            this.adMobInterstitialId = config.adMobInterstitialId;
+            this.adMobRewardedId = config.adMobRewardedId;
+            this.adMobNativeId = config.adMobNativeId;
+
+            this.adsEnabled = config.adsEnabled;
+            this.isTestMode = config.isTestMode;
+            this.isLoggingEnabled = config.isLoggingEnabled;
+            this.collapsibleBannerEnabled = config.collapsibleBannerEnabled;
+            this.useUmpConsent = config.useUmpConsent;
+            this.houseAdsEnabled = config.houseAdsEnabled;
+
+            this.facebookMediationEnabled = config.facebookMediationEnabled;
+            this.applovinMediationEnabled = config.appLovinMediationEnabled;
+            this.unityMediationEnabled = config.unityMediationEnabled;
+
+            this.maxAdContentRating = config.maxAdContentRating;
+            this.tagForChildDirectedTreatment = config.tagForChildDirectedTreatment;
+            this.tagForUnderAgeOfConsent = config.tagForUnderAgeOfConsent;
+            this.frequencyCapSeconds = config.frequencyCapSeconds;
+
+            this.dialogBackgroundColor = config.dialogBackgroundColor;
+            this.dialogTextColor = config.dialogTextColor;
+            this.dialogText = config.dialogText;
+
+            this.testDeviceIds.addAll(config.testDeviceIds);
+            this.houseAds.addAll(config.houseAds);
         }
 
-        public Builder setAdsEnabled(boolean enabled) {
-            this.adsEnabled = enabled;
-            return this;
-        }
+        // --- Ad Unit IDs ---
 
         public Builder setAdMobAppOpenId(String id) {
             this.adMobAppOpenId = id;
@@ -206,38 +311,75 @@ public class SmartAdsConfig {
             return this;
         }
 
-        public Builder enableTestMode(boolean testMode) {
-            this.isTestMode = testMode;
+        // --- Feature Flags ---
+
+        /**
+         * Sets whether ads are globally enabled. Default: false
+         */
+        public Builder setAdsEnabled(boolean enabled) {
+            this.adsEnabled = enabled;
             return this;
         }
 
-        public Builder enableCollapsibleBanner(boolean enabled) {
+        /**
+         * Sets whether Test Mode is enabled. Default: false
+         */
+        public Builder setTestModeEnabled(boolean enabled) {
+            this.isTestMode = enabled;
+            return this;
+        }
+
+        /**
+         * Sets whether debug logging is enabled. Default: false
+         */
+        public Builder setLoggingEnabled(boolean enabled) {
+            this.isLoggingEnabled = enabled;
+            return this;
+        }
+
+        /**
+         * Sets whether House Ads (internal cross-promotion) are enabled. Default: false
+         */
+        public Builder setHouseAdsEnabled(boolean enabled) {
+            this.houseAdsEnabled = enabled;
+            return this;
+        }
+
+        /**
+         * Sets whether collapsible banners are enabled. Default: false
+         */
+        public Builder setCollapsibleBannerEnabled(boolean enabled) {
             this.collapsibleBannerEnabled = enabled;
             return this;
         }
 
+        /**
+         * Sets whether to use Google UMP for consent. Default: false
+         */
         public Builder setUseUmpConsent(boolean useUmp) {
             this.useUmpConsent = useUmp;
             return this;
         }
 
-        public Builder setFrequencyCap(long seconds) {
-            this.frequencyCapSeconds = seconds;
+        // --- Mediation ---
+
+        public Builder setFacebookMediationEnabled(boolean enabled) {
+            this.facebookMediationEnabled = enabled;
             return this;
         }
 
-        public Builder addTestDeviceId(String testDeviceId) {
-            if (testDeviceId != null && !testDeviceId.isEmpty()) {
-                this.testDeviceIds.add(testDeviceId);
-            }
+        public Builder setAppLovinMediationEnabled(boolean enabled) {
+            this.applovinMediationEnabled = enabled;
             return this;
         }
 
-        /**
-         * Sets max ad content rating.
-         * 
-         * @param rating One of RequestConfiguration.MAX_AD_CONTENT_RATING_*.
-         */
+        public Builder setUnityMediationEnabled(boolean enabled) {
+            this.unityMediationEnabled = enabled;
+            return this;
+        }
+
+        // --- Configuration & Limits ---
+
         public Builder setMaxAdContentRating(String rating) {
             this.maxAdContentRating = rating;
             return this;
@@ -250,6 +392,51 @@ public class SmartAdsConfig {
 
         public Builder setTagForUnderAgeOfConsent(int tag) {
             this.tagForUnderAgeOfConsent = tag;
+            return this;
+        }
+
+        /**
+         * Sets frequency cap for full-screen ads in seconds. Default: 30s
+         */
+        public Builder setFrequencyCapSeconds(long seconds) {
+            this.frequencyCapSeconds = seconds;
+            return this;
+        }
+
+        // --- UI & Customization ---
+
+        public Builder setLoadingDialogColor(@androidx.annotation.ColorInt int backgroundColor,
+                @androidx.annotation.ColorInt int textColor) {
+            this.dialogBackgroundColor = backgroundColor;
+            this.dialogTextColor = textColor;
+            return this;
+        }
+
+        public Builder setLoadingDialogText(String text) {
+            this.dialogText = text;
+            return this;
+        }
+
+        // --- Lists ---
+
+        public Builder addTestDeviceId(String id) {
+            if (id != null && !id.isEmpty()) {
+                this.testDeviceIds.add(id);
+            }
+            return this;
+        }
+
+        public Builder addHouseAd(HouseAd ad) {
+            if (ad != null) {
+                this.houseAds.add(ad);
+            }
+            return this;
+        }
+
+        public Builder setHouseAds(List<HouseAd> ads) {
+            if (ads != null) {
+                this.houseAds = new ArrayList<>(ads);
+            }
             return this;
         }
 

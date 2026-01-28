@@ -12,12 +12,24 @@ import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.LoadAdError;
+import com.partharoypc.smartads.SmartAds;
 import com.partharoypc.smartads.SmartAdsConfig;
 import com.partharoypc.smartads.TestAdIds;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+
+import com.partharoypc.smartads.R;
+import com.partharoypc.smartads.SmartAdsLogger;
+import com.partharoypc.smartads.house.HouseAd;
+import com.partharoypc.smartads.house.HouseAdLoader;
 import com.partharoypc.smartads.listeners.BannerAdListener;
 
+import java.util.Map;
+import java.util.WeakHashMap;
+
 public class BannerAdManager {
-    private final java.util.Map<FrameLayout, Boolean> listenerAdded = new java.util.WeakHashMap<>();
+    private final Map<FrameLayout, Boolean> listenerAdded = new WeakHashMap<>();
 
     @RequiresPermission(Manifest.permission.INTERNET)
     public void loadAndShowAd(Activity activity, FrameLayout adContainer, SmartAdsConfig config,
@@ -36,8 +48,10 @@ public class BannerAdManager {
 
         String adUnitId = config.isTestMode() ? TestAdIds.ADMOB_BANNER_ID : config.getAdMobBannerId();
         if (adUnitId == null || adUnitId.isEmpty()) {
-            if (listener != null)
-                listener.onAdFailed("No AdMob ID provided.");
+            if (config.isHouseAdsEnabled()) {
+                SmartAdsLogger.d("AdMob Banner ID not set. Trying House Ad.");
+                loadHouseBanner(activity, adContainer, config, listener);
+            }
             return;
         }
 
@@ -46,6 +60,12 @@ public class BannerAdManager {
 
         int containerWidth = adContainer.getWidth();
         if (containerWidth == 0) {
+            // Check if view is actually visible or just not laid out
+            if (adContainer.getVisibility() == View.GONE) {
+                if (listener != null)
+                    listener.onAdFailed("Banner Container is GONE. Cannot load ad.");
+                return;
+            }
             adContainer.post(() -> {
                 if (!activity.isFinishing() && !activity.isDestroyed()) {
                     loadAdMob(activity, adContainer, config, listener);
@@ -54,15 +74,21 @@ public class BannerAdManager {
             return;
         }
 
+        SmartAdsLogger.d("Loading Banner Ad...");
+
         AdView admobBanner = new AdView(activity);
         float density = activity.getResources().getDisplayMetrics().density;
         int adWidthInDp = Math.max(0, (int) (containerWidth / density));
         AdSize adaptiveSize = AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(activity, adWidthInDp);
         admobBanner.setAdSize(adaptiveSize);
         admobBanner.setAdUnitId(adUnitId);
+        admobBanner.setOnPaidEventListener(adValue -> {
+            SmartAds.getInstance().reportPaidEvent(adValue, admobBanner.getResponseInfo(), adUnitId, "Banner");
+        });
         admobBanner.setAdListener(new AdListener() {
             @Override
             public void onAdLoaded() {
+                SmartAdsLogger.d("✅ Banner Ad LOADED.");
                 if (!isContainerActive(adContainer) || activity.isFinishing() || activity.isDestroyed()) {
                     try {
                         admobBanner.destroy();
@@ -76,20 +102,24 @@ public class BannerAdManager {
                     listener.onAdLoaded(admobBanner);
             }
 
-            @Override
             public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                if (listener != null)
-                    listener.onAdFailed(loadAdError.getMessage());
+                SmartAdsLogger.e("❌ Banner Ad Failed to Load: " + loadAdError.getMessage());
+                // FALLBACK TO HOUSE AD
+                if (config.isHouseAdsEnabled()) {
+                    loadHouseBanner(activity, adContainer, config, listener);
+                }
             }
 
             @Override
             public void onAdOpened() {
+                SmartAdsLogger.d("Banner Ad Clicked/Opened.");
                 if (listener != null)
                     listener.onAdClicked();
             }
 
             @Override
             public void onAdImpression() {
+                SmartAdsLogger.d("Banner Ad Impression.");
                 if (listener != null)
                     listener.onAdImpression();
             }
@@ -104,19 +134,53 @@ public class BannerAdManager {
         admobBanner.loadAd(builder.build());
     }
 
+    private void loadHouseBanner(Activity activity, FrameLayout adContainer, SmartAdsConfig config,
+            BannerAdListener listener) {
+        HouseAd houseAd = HouseAdLoader.selectAd(config.getHouseAds());
+        if (houseAd == null) {
+            SmartAdsLogger.e("No House Banner Ad available.");
+            if (listener != null)
+                listener.onAdFailed("AdMob failed and no House Ads available.");
+            return;
+        }
+
+        SmartAdsLogger.d("Showing House Banner Ad.");
+
+        View houseBannerView = android.view.LayoutInflater.from(activity)
+                .inflate(R.layout.layout_house_banner, adContainer, false);
+
+        ImageView imageView = houseBannerView.findViewById(R.id.house_banner_image);
+
+        if (houseAd.getImageResId() != 0) {
+            imageView.setImageResource(houseAd.getImageResId());
+        } else {
+            imageView.setBackgroundColor(android.graphics.Color.LTGRAY);
+        }
+
+        houseBannerView.setOnClickListener(v -> HouseAdLoader.handleClick(activity, houseAd));
+
+        adContainer.removeAllViews();
+        adContainer.addView(houseBannerView);
+
+        if (listener != null) {
+            listener.onAdLoaded(houseBannerView);
+        }
+    }
+
     private boolean isContainerActive(FrameLayout adContainer) {
-        if (adContainer.getWindowToken() == null)
-            return false;
-        if (adContainer.getVisibility() != android.view.View.VISIBLE)
-            return false;
-        return adContainer.isShown();
+        // We only check if the container is not null.
+        // The activity validity is checked at the start of load method.
+        // We do NOT check window token here because in some cases (RecyclerView, view
+        // pager)
+        // the view might be detached momentarily or not yet attached.
+        return adContainer != null;
     }
 
     public void destroy(FrameLayout adContainer) {
         try {
             int childCount = adContainer.getChildCount();
             for (int i = 0; i < childCount; i++) {
-                android.view.View child = adContainer.getChildAt(i);
+                View child = adContainer.getChildAt(i);
                 if (child instanceof AdView) {
                     ((AdView) child).destroy();
                 }

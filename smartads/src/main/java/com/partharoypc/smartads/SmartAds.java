@@ -9,11 +9,13 @@ import android.widget.FrameLayout;
 import androidx.annotation.LayoutRes;
 import androidx.annotation.RequiresPermission;
 
+import com.google.android.ads.mediationtestsuite.MediationTestSuite;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.RequestConfiguration;
 import com.google.android.ump.ConsentInformation;
 import com.google.android.ump.ConsentRequestParameters;
 import com.google.android.ump.UserMessagingPlatform;
+import com.partharoypc.smartads.analytics.SmartAdsAnalyticsListener;
 import com.partharoypc.smartads.listeners.AppOpenAdListener;
 import com.partharoypc.smartads.listeners.BannerAdListener;
 import com.partharoypc.smartads.listeners.InterstitialAdListener;
@@ -37,6 +39,8 @@ public class SmartAds {
     private BannerAdManager bannerAdManager;
     private NativeAdManager nativeAdManager;
 
+    private SmartAdsAnalyticsListener analyticsListener;
+
     private Application application;
 
     private SmartAds() {
@@ -46,7 +50,7 @@ public class SmartAds {
         ConsentRequestParameters params = new ConsentRequestParameters.Builder().build();
         ConsentInformation consentInformation = UserMessagingPlatform.getConsentInformation(application);
         consentInformation.requestConsentInfoUpdate(
-                appOpenAdManager != null ? appOpenAdManager.getCurrentActivityForUmp() : null,
+                (appOpenAdManager != null) ? appOpenAdManager.getCurrentActivityForUmp() : null,
                 params,
                 () -> {
                     UserMessagingPlatform.loadAndShowConsentFormIfRequired(
@@ -74,6 +78,12 @@ public class SmartAds {
         }
     }
 
+    /**
+     * Returns the singleton instance of SmartAds.
+     *
+     * @return The SmartAds instance.
+     * @throws IllegalStateException if initialize() has not been called.
+     */
     public static SmartAds getInstance() {
         if (instance == null) {
             throw new IllegalStateException(
@@ -82,6 +92,20 @@ public class SmartAds {
         return instance;
     }
 
+    /**
+     * Returns the current version of the library.
+     */
+    public static String getVersion() {
+        return "5.0.0";
+    }
+
+    /**
+     * Initializes the SmartAds library.
+     * This must be called in your Application class's onCreate() method.
+     *
+     * @param application The Android Application instance.
+     * @param config      The configuration for the ads library.
+     */
     @RequiresPermission(Manifest.permission.INTERNET)
     public static void initialize(Application application, SmartAdsConfig config) {
         if (instance == null) {
@@ -120,22 +144,82 @@ public class SmartAds {
                         instance.initializeSdks(application);
                     }
 
+                    // CHECK: Mediation Configuration Safety Check
+                    if (config.isLoggingEnabled()) {
+                        instance.verifyMediation(application);
+                    }
                 }
             }
         }
     }
 
+    /**
+     * Launches the AdMob Mediation Debugger/Inspector.
+     * Useful for verifying ad network integration.
+     *
+     * @param activity current activity context.
+     */
     public void launchAdInspector(Activity activity) {
         MobileAds.openAdInspector(activity, error -> {
             /* Ad inspector closed or error */
         });
     }
 
+    /**
+     * Checks if configured mediation adapters are present in the classpath.
+     * Logs the result to the console.
+     */
+    public void verifyMediation(Context context) {
+        if (config == null || !config.isLoggingEnabled())
+            return;
+        SmartAdsLogger.d("--- SmartAds Mediation Verification ---");
+
+        if (config.isFacebookMediationEnabled()) {
+            checkAdapter("com.google.ads.mediation.facebook.FacebookAdapter", "Facebook / Meta Audience Network");
+        }
+        if (config.isAppLovinMediationEnabled()) {
+            checkAdapter("com.google.ads.mediation.applovin.ApplovinAdapter", "AppLovin");
+        }
+        if (config.isUnityMediationEnabled()) {
+            checkAdapter("com.google.ads.mediation.unity.UnityAdapter", "Unity Ads");
+        }
+        SmartAdsLogger.d("---------------------------------------");
+    }
+
+    /**
+     * Opens the Mediation Test Suite if the dependency is included.
+     */
+    public void openMediationTestSuite(Context context) {
+        try {
+            MediationTestSuite.launch(context);
+        } catch (Exception e) {
+            SmartAdsLogger.e("Failed to launch Mediation Test Suite: " + e.getMessage());
+        }
+    }
+
+    private void checkAdapter(String className, String networkName) {
+        try {
+            Class.forName(className);
+            SmartAdsLogger.d("✅ " + networkName + " Adapter found.");
+        } catch (ClassNotFoundException e) {
+            SmartAdsLogger.e("❌ " + networkName + " Adapter NOT found. Add dependency.");
+        }
+    }
+
+    /**
+     * Checks if the user is required to see privacy options (e.g., GDPR).
+     *
+     * @return true if privacy options are required.
+     */
     public boolean isPrivacyOptionsRequired() {
         return UserMessagingPlatform.getConsentInformation(application)
                 .getPrivacyOptionsRequirementStatus() == ConsentInformation.PrivacyOptionsRequirementStatus.REQUIRED;
     }
 
+    /**
+     * Pre-loads ads (App Open, Interstitial, Rewarded) based on configuration.
+     * Should be called after initialization or when appropriate.
+     */
     public void preloadAds(Context context) {
         if (!canShowAds())
             return;
@@ -165,21 +249,41 @@ public class SmartAds {
         initializeManagersIfNeeded(application);
     }
 
+    /**
+     * Shows the UMP Privacy Options Form to the user.
+     */
     public void showPrivacyOptionsForm(Activity activity) {
         try {
             UserMessagingPlatform.showPrivacyOptionsForm(activity, formError -> {
-                /* no-op */ });
+                /* no-op */
+            });
         } catch (Exception ignored) {
         }
     }
 
     // --- App Open Ad (Manual) ---
+
+    /**
+     * Manually shows an App Open Ad if available.
+     *
+     * @param activity The current activity.
+     */
     public void showAppOpenAd(Activity activity) {
         if (canShowAds() && appOpenAdManager != null) {
             appOpenAdManager.showAdIfAvailable();
         }
     }
 
+    /**
+     * Checks if an App Open Ad is currently available to show.
+     */
+    public boolean isAppOpenAdAvailable() {
+        return appOpenAdManager != null && appOpenAdManager.isAdAvailable();
+    }
+
+    /**
+     * Returns the current status of the App Open Ad.
+     */
     public AdStatus getAppOpenAdStatus() {
         if (appOpenAdManager != null) {
             return appOpenAdManager.getAdStatus();
@@ -187,6 +291,9 @@ public class SmartAds {
         return AdStatus.IDLE;
     }
 
+    /**
+     * Temporarily enables or disables ads (e.g. if user purchased premium).
+     */
     public void setAdsEnabled(boolean enabled) {
         this.adsEnabled = enabled;
     }
@@ -198,6 +305,51 @@ public class SmartAds {
     public void setAppOpenAdListener(AppOpenAdListener listener) {
         if (appOpenAdManager != null) {
             appOpenAdManager.setListener(listener);
+        }
+    }
+
+    public void setAnalyticsListener(SmartAdsAnalyticsListener listener) {
+        this.analyticsListener = listener;
+    }
+
+    /**
+     * Internal method used by Ad Managers to report revenue.
+     */
+    public void reportPaidEvent(com.google.android.gms.ads.AdValue adValue,
+            com.google.android.gms.ads.ResponseInfo responseInfo,
+            String adUnitId,
+            String adFormat) {
+        if (analyticsListener != null) {
+            String adapterClassName = "unknown";
+            if (responseInfo != null && responseInfo.getMediationAdapterClassName() != null) {
+                adapterClassName = responseInfo.getMediationAdapterClassName();
+            }
+
+            // Simplified Network Name Mapping
+            String networkName = adapterClassName;
+            if (adapterClassName.contains("Facebook") || adapterClassName.contains("Meta")) {
+                networkName = "Facebook Audience Network";
+            } else if (adapterClassName.contains("AppLovin")) {
+                networkName = "AppLovin";
+            } else if (adapterClassName.contains("Unity")) {
+                networkName = "Unity Ads";
+            } else if (adapterClassName.contains("Google")) {
+                networkName = "Google AdMob";
+            }
+
+            analyticsListener.onAdRevenuePaid(
+                    adUnitId,
+                    adFormat,
+                    networkName,
+                    adValue.getValueMicros(),
+                    adValue.getCurrencyCode(),
+                    adValue.getPrecisionType(),
+                    null);
+
+            SmartAdsLogger.d("💰 Paid Event: " +
+                    adValue.getValueMicros() + " " + adValue.getCurrencyCode() +
+                    " | Network: " + networkName +
+                    " | Format: " + adFormat);
         }
     }
 
@@ -216,18 +368,32 @@ public class SmartAds {
     }
 
     // --- Interstitial Ads ---
+
+    /**
+     * Checks if an Interstitial Ad is loaded and ready to show.
+     */
+    public boolean isInterstitialAdAvailable() {
+        return interstitialAdManager != null && interstitialAdManager.getAdStatus() == AdStatus.LOADED;
+    }
+
+    /**
+     * Manually starts loading an Interstitial Ad.
+     */
     public void loadInterstitialAd(Context context) {
         if (canShowAds()) {
             interstitialAdManager.loadAd(context, config);
         }
     }
 
+    /**
+     * Shows the Interstitial Ad if available.
+     *
+     * @param activity The activity context.
+     * @param listener The listener for ad events.
+     */
     public void showInterstitialAd(Activity activity, InterstitialAdListener listener) {
-        if (canShowAds() && config.isInterstitialConfigured()) {
+        if (canShowAds()) {
             interstitialAdManager.showAd(activity, listener);
-        } else {
-            if (listener != null)
-                listener.onAdFailedToShow("Ad condition not met or ad unit not configured.");
         }
     }
 
@@ -236,12 +402,29 @@ public class SmartAds {
     }
 
     // --- Rewarded Ads ---
+
+    /**
+     * Checks if a Rewarded Ad is loaded and ready to show.
+     */
+    public boolean isRewardedAdAvailable() {
+        return rewardedAdManager != null && rewardedAdManager.getAdStatus() == AdStatus.LOADED;
+    }
+
+    /**
+     * Manually starts loading a Rewarded Ad.
+     */
     public void loadRewardedAd(Context context) {
         if (canShowAds()) {
             rewardedAdManager.loadAd(context, config);
         }
     }
 
+    /**
+     * Shows a Rewarded Ad if loaded.
+     *
+     * @param activity Current activity.
+     * @param listener Callback listener.
+     */
     public void showRewardedAd(Activity activity, RewardedAdListener listener) {
         if (canShowAds() && config.isRewardedConfigured()) {
             rewardedAdManager.showAd(activity, listener);
@@ -255,6 +438,10 @@ public class SmartAds {
         return rewardedAdManager.getAdStatus();
     }
 
+    /**
+     * Checks if any full screen ad (Interstitial, Rewarded, or App Open) is
+     * currently showing.
+     */
     public boolean isAnyAdShowing() {
         boolean interShowing = interstitialAdManager != null && interstitialAdManager.getAdStatus() == AdStatus.SHOWN;
         boolean rewardedShowing = rewardedAdManager != null && rewardedAdManager.getAdStatus() == AdStatus.SHOWN;
@@ -263,6 +450,14 @@ public class SmartAds {
     }
 
     // --- Banner Ads ---
+
+    /**
+     * Loads and shows a Banner Ad in the provided container.
+     *
+     * @param activity    Current activity.
+     * @param adContainer FrameLayout to hold the banner.
+     * @param listener    Callback listener.
+     */
     @RequiresPermission(Manifest.permission.INTERNET)
     public void showBannerAd(Activity activity, FrameLayout adContainer, BannerAdListener listener) {
         if (canShowAds() && config.isBannerConfigured()) {
@@ -274,6 +469,15 @@ public class SmartAds {
     }
 
     // --- Native Ads ---
+
+    /**
+     * Loads and shows a Native Ad with a custom layout reference.
+     *
+     * @param activity    Current activity.
+     * @param adContainer FrameLayout to hold the native ad.
+     * @param layoutRes   Resource ID of the native ad layout.
+     * @param listener    Callback listener.
+     */
     public void showNativeAd(Activity activity, FrameLayout adContainer, @LayoutRes int layoutRes,
             NativeAdListener listener) {
         if (canShowAds() && config.isNativeConfigured()) {
@@ -284,6 +488,14 @@ public class SmartAds {
         }
     }
 
+    /**
+     * Loads and shows a Native Ad with a standard size template.
+     *
+     * @param activity    Current activity.
+     * @param adContainer FrameLayout to hold the native ad.
+     * @param size        Size enum (SMALL, MEDIUM, LARGE).
+     * @param listener    Callback listener.
+     */
     public void showNativeAd(Activity activity, FrameLayout adContainer, NativeAdSize size, NativeAdListener listener) {
         if (canShowAds() && config.isNativeConfigured()) {
             nativeAdManager.loadAndShowAd(activity, adContainer, size, config, listener);
@@ -294,6 +506,10 @@ public class SmartAds {
     }
 
     // --- Helpers to clean up views to avoid leaks ---
+
+    /**
+     * Destroys existing banner ads in the container and clears the view.
+     */
     public void destroyBannerIn(FrameLayout adContainer) {
         if (adContainer == null)
             return;
@@ -310,6 +526,9 @@ public class SmartAds {
         adContainer.removeAllViews();
     }
 
+    /**
+     * Clears potential native ad views from the container.
+     */
     public void clearNativeIn(FrameLayout adContainer) {
         if (adContainer == null)
             return;

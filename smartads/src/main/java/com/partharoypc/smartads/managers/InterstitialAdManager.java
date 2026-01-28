@@ -11,13 +11,23 @@ import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.interstitial.InterstitialAd;
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
 import com.partharoypc.smartads.AdStatus;
+import com.partharoypc.smartads.SmartAds;
 import com.partharoypc.smartads.SmartAdsConfig;
 import com.partharoypc.smartads.TestAdIds;
+import com.partharoypc.smartads.SmartAdsLogger;
+import com.partharoypc.smartads.house.HouseAd;
+import com.partharoypc.smartads.house.HouseAdLoader;
+import com.partharoypc.smartads.house.HouseInterstitialActivity;
 import com.partharoypc.smartads.listeners.InterstitialAdListener;
+
+import java.util.List;
 
 public class InterstitialAdManager extends BaseFullScreenAdManager {
     private InterstitialAd admobInterstitial;
     private InterstitialAdListener developerListener;
+    private boolean isHouseAdReady = false;
+    private HouseAd selectedHouseAd;
+    private int selectedHouseAdIndex = -1;
 
     public void loadAd(Context context, SmartAdsConfig config) {
         if (adStatus == AdStatus.LOADING || adStatus == AdStatus.LOADED || isLoading) {
@@ -25,19 +35,20 @@ public class InterstitialAdManager extends BaseFullScreenAdManager {
         }
         adStatus = AdStatus.LOADING;
         isLoading = true;
+        isHouseAdReady = false;
+        selectedHouseAd = null;
+        selectedHouseAdIndex = -1;
+        SmartAdsLogger.d("Loading Interstitial Ad...");
         loadAdMob(context, config);
     }
 
     private void loadAdMob(Context context, SmartAdsConfig config) {
         String adUnitId = config.isTestMode() ? TestAdIds.ADMOB_INTERSTITIAL_ID : config.getAdMobInterstitialId();
         if (adUnitId == null || adUnitId.isEmpty()) {
-            onAdFailedToLoadBase();
-
-            if (isShowPending && developerListener != null) {
-                developerListener.onAdFailedToShow("Ad Unit ID is missing.");
+            if (config.isHouseAdsEnabled()) {
+                SmartAdsLogger.d("AdMob Int. ID not set. Trying House Ad.");
+                loadHouseAd(context, config);
             }
-            isShowPending = false;
-            pendingActivity = null;
             return;
         }
 
@@ -45,18 +56,25 @@ public class InterstitialAdManager extends BaseFullScreenAdManager {
         InterstitialAd.load(context, adUnitId, adRequest, new InterstitialAdLoadCallback() {
             @Override
             public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
+                SmartAdsLogger.d("✅ Interstitial Ad LOADED.");
                 admobInterstitial = interstitialAd;
+                interstitialAd.setOnPaidEventListener(adValue -> {
+                    SmartAds.getInstance().reportPaidEvent(adValue, interstitialAd.getResponseInfo(), adUnitId,
+                            "Interstitial");
+                });
                 onAdLoadedBase();
-
-                if (isShowPending && pendingActivity != null) {
-                    showAd(pendingActivity, developerListener);
-                    isShowPending = false;
-                    pendingActivity = null;
-                }
+                checkPendingShow();
             }
 
             @Override
             public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                SmartAdsLogger.e("❌ Interstitial Failed to Load: " + loadAdError.getMessage());
+                // FALLBACK TO HOUSE AD
+                if (loadHouseAd(context, config)) {
+                    SmartAdsLogger.d("Fallback to House Interstitial.");
+                    return;
+                }
+
                 onAdFailedToLoadBase();
 
                 if (isShowPending && developerListener != null) {
@@ -70,6 +88,30 @@ public class InterstitialAdManager extends BaseFullScreenAdManager {
         });
     }
 
+    private boolean loadHouseAd(Context context, SmartAdsConfig config) {
+        if (!config.isHouseAdsEnabled()) {
+            return false;
+        }
+        List<HouseAd> houseAds = config.getHouseAds();
+        selectedHouseAd = HouseAdLoader.selectAd(houseAds);
+        if (selectedHouseAd != null) {
+            selectedHouseAdIndex = houseAds.indexOf(selectedHouseAd);
+            isHouseAdReady = true;
+            onAdLoadedBase();
+            checkPendingShow();
+            return true;
+        }
+        return false;
+    }
+
+    private void checkPendingShow() {
+        if (isShowPending && pendingActivity != null) {
+            showAd(pendingActivity, developerListener);
+            isShowPending = false;
+            pendingActivity = null;
+        }
+    }
+
     public void showAd(Activity activity, InterstitialAdListener listener) {
         if (activity == null || activity.isFinishing() || activity.isDestroyed()) {
             if (listener != null)
@@ -80,13 +122,15 @@ public class InterstitialAdManager extends BaseFullScreenAdManager {
         this.developerListener = listener;
 
         if (adStatus == AdStatus.LOADING) {
+            SmartAdsLogger.d("Ad Loading... Activity waiting.");
             isShowPending = true;
             pendingActivity = activity;
             showLoadingDialog(activity);
             return;
         }
 
-        if (isFrequencyCapped(com.partharoypc.smartads.SmartAds.getInstance().getConfig())) {
+        if (isFrequencyCapped(SmartAds.getInstance().getConfig())) {
+            SmartAdsLogger.d("Ad Frequency Capped. Skipping.");
             if (listener != null)
                 listener.onAdFailedToShow("Ad is frequency capped.");
             return;
@@ -94,59 +138,101 @@ public class InterstitialAdManager extends BaseFullScreenAdManager {
 
         if (adStatus != AdStatus.LOADED) {
             // Not loaded -> load and wait
+            SmartAdsLogger.d("Ad not loaded. Starting load...");
             isShowPending = true;
             pendingActivity = activity;
             showLoadingDialog(activity);
-            SmartAdsConfig config = com.partharoypc.smartads.SmartAds.getInstance().getConfig();
+            SmartAdsConfig config = SmartAds.getInstance().getConfig();
             loadAd(activity, config);
             return;
         }
 
         if (admobInterstitial != null) {
-            admobInterstitial.setFullScreenContentCallback(new FullScreenContentCallback() {
-                @Override
-                public void onAdDismissedFullScreenContent() {
-                    if (developerListener != null)
-                        developerListener.onAdDismissed();
-                    admobInterstitial = null;
-                    adStatus = AdStatus.IDLE;
-                    if (isAutoReloadEnabled) {
-                        loadAd(activity, com.partharoypc.smartads.SmartAds.getInstance().getConfig());
-                    }
-                }
-
-                @Override
-                public void onAdFailedToShowFullScreenContent(@NonNull com.google.android.gms.ads.AdError adError) {
-                    if (developerListener != null) {
-                        developerListener.onAdFailedToShow(adError.getMessage());
-                    }
-                    admobInterstitial = null;
-                    adStatus = AdStatus.IDLE;
-                    if (isAutoReloadEnabled) {
-                        loadAd(activity, com.partharoypc.smartads.SmartAds.getInstance().getConfig());
-                    }
-                }
-
-                @Override
-                public void onAdShowedFullScreenContent() {
-                    adStatus = AdStatus.SHOWN;
-                    lastShownTime = System.currentTimeMillis();
-                    if (developerListener != null) {
-                        developerListener.onAdImpression();
-                    }
-                }
-
-                @Override
-                public void onAdClicked() {
-                    if (developerListener != null) {
-                        developerListener.onAdClicked();
-                    }
-                }
-            });
-            admobInterstitial.show(activity);
+            SmartAdsLogger.d("Showing AdMob Interstitial.");
+            showAdMobInterstitial(activity);
+        } else if (isHouseAdReady && selectedHouseAd != null) {
+            SmartAdsLogger.d("Showing House Interstitial.");
+            showHouseInterstitial(activity);
         } else {
             if (developerListener != null)
                 listener.onAdFailedToShow("Ad not loaded.");
         }
+    }
+
+    private void showAdMobInterstitial(Activity activity) {
+        admobInterstitial.setFullScreenContentCallback(new FullScreenContentCallback() {
+            @Override
+            public void onAdDismissedFullScreenContent() {
+                SmartAdsLogger.d("Interstitial Dismissed.");
+                if (developerListener != null)
+                    developerListener.onAdDismissed();
+                admobInterstitial = null;
+                adStatus = AdStatus.IDLE;
+                if (isAutoReloadEnabled) {
+                    loadAd(activity, SmartAds.getInstance().getConfig());
+                }
+            }
+
+            @Override
+            public void onAdFailedToShowFullScreenContent(@NonNull com.google.android.gms.ads.AdError adError) {
+                SmartAdsLogger.e("Interstitial Failed to Show: " + adError.getMessage());
+                if (developerListener != null) {
+                    developerListener.onAdFailedToShow(adError.getMessage());
+                }
+                admobInterstitial = null;
+                adStatus = AdStatus.IDLE;
+                if (isAutoReloadEnabled) {
+                    loadAd(activity, SmartAds.getInstance().getConfig());
+                }
+            }
+
+            @Override
+            public void onAdShowedFullScreenContent() {
+                adStatus = AdStatus.SHOWN;
+                lastShownTime = System.currentTimeMillis();
+                if (developerListener != null) {
+                    developerListener.onAdImpression();
+                }
+            }
+
+            @Override
+            public void onAdClicked() {
+                if (developerListener != null) {
+                    developerListener.onAdClicked();
+                }
+            }
+        });
+        admobInterstitial.show(activity);
+    }
+
+    private void showHouseInterstitial(Activity activity) {
+        HouseInterstitialActivity.start(activity, selectedHouseAdIndex,
+                new HouseInterstitialActivity.HouseInterstitialListener() {
+                    @Override
+                    public void onAdDismissed() {
+                        SmartAdsLogger.d("House Interstitial Dismissed.");
+                        if (developerListener != null)
+                            developerListener.onAdDismissed();
+                        isHouseAdReady = false;
+                        adStatus = AdStatus.IDLE;
+                        if (isAutoReloadEnabled) {
+                            loadAd(activity, SmartAds.getInstance().getConfig());
+                        }
+                    }
+
+                    @Override
+                    public void onAdClicked() {
+                        if (developerListener != null)
+                            developerListener.onAdClicked();
+                    }
+
+                    @Override
+                    public void onAdImpression() {
+                        adStatus = AdStatus.SHOWN;
+                        lastShownTime = System.currentTimeMillis();
+                        if (developerListener != null)
+                            developerListener.onAdImpression();
+                    }
+                });
     }
 }

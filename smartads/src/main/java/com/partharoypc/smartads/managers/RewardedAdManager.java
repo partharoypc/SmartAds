@@ -11,13 +11,23 @@ import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.rewarded.RewardedAd;
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback;
 import com.partharoypc.smartads.AdStatus;
+import com.partharoypc.smartads.SmartAds;
 import com.partharoypc.smartads.SmartAdsConfig;
 import com.partharoypc.smartads.TestAdIds;
+import com.partharoypc.smartads.SmartAdsLogger;
+import com.partharoypc.smartads.house.HouseAd;
+import com.partharoypc.smartads.house.HouseAdLoader;
 import com.partharoypc.smartads.listeners.RewardedAdListener;
+
+import java.util.List;
 
 public class RewardedAdManager extends BaseFullScreenAdManager {
     private RewardedAd admobRewardedAd;
     private RewardedAdListener developerListener;
+
+    private boolean isHouseAdReady = false;
+    private HouseAd selectedHouseAd;
+    private int selectedHouseAdIndex = -1;
 
     public void loadAd(Context context, SmartAdsConfig config) {
         if (adStatus == AdStatus.LOADING || adStatus == AdStatus.LOADED || isLoading) {
@@ -25,18 +35,20 @@ public class RewardedAdManager extends BaseFullScreenAdManager {
         }
         adStatus = AdStatus.LOADING;
         isLoading = true;
+        isHouseAdReady = false;
+        selectedHouseAd = null;
+        selectedHouseAdIndex = -1;
+        SmartAdsLogger.d("Loading Rewarded Ad...");
         loadAdMob(context, config);
     }
 
     private void loadAdMob(Context context, SmartAdsConfig config) {
         String adUnitId = config.isTestMode() ? TestAdIds.ADMOB_REWARDED_ID : config.getAdMobRewardedId();
         if (adUnitId == null || adUnitId.isEmpty()) {
-            onAdFailedToLoadBase();
-            if (isShowPending && developerListener != null) {
-                developerListener.onAdFailedToShow("Ad Unit ID is missing.");
+            if (config.isHouseAdsEnabled()) {
+                SmartAdsLogger.d("AdMob Rewarded ID not set. Trying House Ad.");
+                loadHouseAd(context, config);
             }
-            isShowPending = false;
-            pendingActivity = null;
             return;
         }
 
@@ -44,20 +56,25 @@ public class RewardedAdManager extends BaseFullScreenAdManager {
         RewardedAd.load(context, adUnitId, adRequest, new RewardedAdLoadCallback() {
             @Override
             public void onAdLoaded(@NonNull RewardedAd rewardedAd) {
+                SmartAdsLogger.d("✅ Rewarded Ad LOADED.");
                 admobRewardedAd = rewardedAd;
+                rewardedAd.setOnPaidEventListener(adValue -> {
+                    SmartAds.getInstance().reportPaidEvent(adValue, rewardedAd.getResponseInfo(), adUnitId, "Rewarded");
+                });
                 onAdLoadedBase();
-
-                if (isShowPending && pendingActivity != null) {
-                    showAd(pendingActivity, developerListener);
-                    isShowPending = false;
-                    pendingActivity = null;
-                }
+                checkPendingShow();
             }
 
             @Override
             public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                onAdFailedToLoadBase();
+                SmartAdsLogger.e("❌ Rewarded Ad Failed to Load: " + loadAdError.getMessage());
+                // Fallback to House Ad
+                if (loadHouseAd(context, config)) {
+                    SmartAdsLogger.d("Fallback to House Rewarded Ad.");
+                    return;
+                }
 
+                onAdFailedToLoadBase();
                 if (isShowPending && developerListener != null) {
                     developerListener.onAdFailedToShow(loadAdError.getMessage());
                 }
@@ -67,6 +84,30 @@ public class RewardedAdManager extends BaseFullScreenAdManager {
                 scheduleRetry(context, config, () -> loadAd(context, config));
             }
         });
+    }
+
+    private boolean loadHouseAd(Context context, SmartAdsConfig config) {
+        if (!config.isHouseAdsEnabled()) {
+            return false;
+        }
+        List<HouseAd> houseAds = config.getHouseAds();
+        selectedHouseAd = HouseAdLoader.selectAd(houseAds);
+        if (selectedHouseAd != null) {
+            selectedHouseAdIndex = houseAds.indexOf(selectedHouseAd);
+            isHouseAdReady = true;
+            onAdLoadedBase();
+            checkPendingShow();
+            return true;
+        }
+        return false;
+    }
+
+    private void checkPendingShow() {
+        if (isShowPending && pendingActivity != null) {
+            showAd(pendingActivity, developerListener);
+            isShowPending = false;
+            pendingActivity = null;
+        }
     }
 
     public void showAd(Activity activity, RewardedAdListener listener) {
@@ -79,6 +120,7 @@ public class RewardedAdManager extends BaseFullScreenAdManager {
         this.developerListener = listener;
 
         if (adStatus == AdStatus.LOADING) {
+            com.partharoypc.smartads.SmartAdsLogger.d("Rewarded Ad Loading... Activity waiting.");
             isShowPending = true;
             pendingActivity = activity;
             showLoadingDialog(activity);
@@ -87,6 +129,7 @@ public class RewardedAdManager extends BaseFullScreenAdManager {
 
         if (adStatus != AdStatus.LOADED) {
             // Not loaded and not loading -> Start loading and wait
+            com.partharoypc.smartads.SmartAdsLogger.d("Rewarded Ad not loaded. Starting load...");
             isShowPending = true;
             pendingActivity = activity;
             showLoadingDialog(activity);
@@ -97,54 +140,101 @@ public class RewardedAdManager extends BaseFullScreenAdManager {
 
         // Ad is LOADED, show it
         if (admobRewardedAd != null) {
-            admobRewardedAd.setFullScreenContentCallback(new FullScreenContentCallback() {
-                @Override
-                public void onAdDismissedFullScreenContent() {
-                    if (developerListener != null)
-                        developerListener.onAdDismissed();
-                    admobRewardedAd = null;
-                    adStatus = AdStatus.IDLE;
-                    if (isAutoReloadEnabled) {
-                        loadAd(activity, com.partharoypc.smartads.SmartAds.getInstance().getConfig());
-                    }
-                }
-
-                @Override
-                public void onAdFailedToShowFullScreenContent(@NonNull com.google.android.gms.ads.AdError adError) {
-                    if (developerListener != null) {
-                        developerListener.onAdFailedToShow(adError.getMessage());
-                    }
-                    admobRewardedAd = null;
-                    adStatus = AdStatus.IDLE;
-                    if (isAutoReloadEnabled) {
-                        loadAd(activity, com.partharoypc.smartads.SmartAds.getInstance().getConfig());
-                    }
-                }
-
-                @Override
-                public void onAdShowedFullScreenContent() {
-                    adStatus = AdStatus.SHOWN;
-                    lastShownTime = System.currentTimeMillis();
-                    if (developerListener != null) {
-                        developerListener.onAdImpression();
-                    }
-                }
-
-                @Override
-                public void onAdClicked() {
-                    if (developerListener != null) {
-                        developerListener.onAdClicked();
-                    }
-                }
-            });
-            admobRewardedAd.show(activity, rewardItem -> {
-                if (developerListener != null)
-                    developerListener.onUserEarnedReward();
-            });
-            adStatus = AdStatus.SHOWN;
+            com.partharoypc.smartads.SmartAdsLogger.d("Showing AdMob Rewarded Ad.");
+            showAdMobRewarded(activity);
+        } else if (isHouseAdReady && selectedHouseAd != null) {
+            com.partharoypc.smartads.SmartAdsLogger.d("Showing House Rewarded Ad.");
+            showHouseRewarded(activity);
         } else {
             if (developerListener != null)
                 listener.onAdFailedToShow("Ad not loaded.");
         }
+    }
+
+    private void showAdMobRewarded(Activity activity) {
+        admobRewardedAd.setFullScreenContentCallback(new FullScreenContentCallback() {
+            @Override
+            public void onAdDismissedFullScreenContent() {
+                com.partharoypc.smartads.SmartAdsLogger.d("Rewarded Ad Dismissed.");
+                if (developerListener != null)
+                    developerListener.onAdDismissed();
+                admobRewardedAd = null;
+                adStatus = AdStatus.IDLE;
+                if (isAutoReloadEnabled) {
+                    loadAd(activity, com.partharoypc.smartads.SmartAds.getInstance().getConfig());
+                }
+            }
+
+            @Override
+            public void onAdFailedToShowFullScreenContent(@NonNull com.google.android.gms.ads.AdError adError) {
+                com.partharoypc.smartads.SmartAdsLogger.e("Rewarded Ad Failed to Show: " + adError.getMessage());
+                if (developerListener != null) {
+                    developerListener.onAdFailedToShow(adError.getMessage());
+                }
+                admobRewardedAd = null;
+                adStatus = AdStatus.IDLE;
+                if (isAutoReloadEnabled) {
+                    loadAd(activity, com.partharoypc.smartads.SmartAds.getInstance().getConfig());
+                }
+            }
+
+            @Override
+            public void onAdShowedFullScreenContent() {
+                adStatus = AdStatus.SHOWN;
+                lastShownTime = System.currentTimeMillis();
+                if (developerListener != null) {
+                    developerListener.onAdImpression();
+                }
+            }
+
+            @Override
+            public void onAdClicked() {
+                if (developerListener != null) {
+                    developerListener.onAdClicked();
+                }
+            }
+        });
+        admobRewardedAd.show(activity, rewardItem -> {
+            com.partharoypc.smartads.SmartAdsLogger
+                    .d("💰 User Earned Reward: " + rewardItem.getType() + " - " + rewardItem.getAmount());
+            if (developerListener != null)
+                developerListener.onUserEarnedReward();
+        });
+    }
+
+    private void showHouseRewarded(Activity activity) {
+        com.partharoypc.smartads.house.HouseInterstitialActivity.start(activity, selectedHouseAdIndex,
+                new com.partharoypc.smartads.house.HouseInterstitialActivity.HouseInterstitialListener() {
+                    @Override
+                    public void onAdDismissed() {
+                        com.partharoypc.smartads.SmartAdsLogger
+                                .d("House Rewarded Ad Dismissed. Granting simulated reward.");
+                        // Grant reward on dismissal for House Ads (Simulated Reward)
+                        if (developerListener != null) {
+                            developerListener.onUserEarnedReward();
+                            developerListener.onAdDismissed();
+                        }
+
+                        isHouseAdReady = false;
+                        adStatus = AdStatus.IDLE;
+                        if (isAutoReloadEnabled) {
+                            loadAd(activity, com.partharoypc.smartads.SmartAds.getInstance().getConfig());
+                        }
+                    }
+
+                    @Override
+                    public void onAdClicked() {
+                        if (developerListener != null)
+                            developerListener.onAdClicked();
+                    }
+
+                    @Override
+                    public void onAdImpression() {
+                        adStatus = AdStatus.SHOWN;
+                        lastShownTime = System.currentTimeMillis();
+                        if (developerListener != null)
+                            developerListener.onAdImpression();
+                    }
+                });
     }
 }

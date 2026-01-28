@@ -17,23 +17,29 @@ import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.nativead.NativeAd;
 import com.google.android.gms.ads.nativead.NativeAdView;
+import com.partharoypc.smartads.NativeAdSize;
 import com.partharoypc.smartads.R;
+import com.partharoypc.smartads.SmartAds;
 import com.partharoypc.smartads.SmartAdsConfig;
+import com.partharoypc.smartads.SmartAdsLogger;
 import com.partharoypc.smartads.TestAdIds;
+import com.partharoypc.smartads.house.HouseAd;
+import com.partharoypc.smartads.house.HouseAdLoader;
 import com.partharoypc.smartads.listeners.NativeAdListener;
 
+import java.util.Map;
+import java.util.WeakHashMap;
+
 public class NativeAdManager {
-    private NativeAd currentAdMobNative;
-    private final java.util.Map<FrameLayout, Boolean> listenerAdded = new java.util.WeakHashMap<>();
-    private final android.os.Handler handler = new android.os.Handler(android.os.Looper.getMainLooper());
-    private int retryAttempt = 0;
+    private final Map<FrameLayout, NativeAd> activeAds = new WeakHashMap<>();
+    private final Map<FrameLayout, Boolean> listenerAdded = new WeakHashMap<>();
 
     public void loadAndShowAd(Activity activity, FrameLayout adContainer, @LayoutRes int layoutRes,
             SmartAdsConfig config, NativeAdListener listener) {
         loadAdMob(activity, adContainer, layoutRes, config, listener);
     }
 
-    public void loadAndShowAd(Activity activity, FrameLayout adContainer, com.partharoypc.smartads.NativeAdSize size,
+    public void loadAndShowAd(Activity activity, FrameLayout adContainer, NativeAdSize size,
             SmartAdsConfig config, NativeAdListener listener) {
         int layoutRes;
         switch (size) {
@@ -63,13 +69,21 @@ public class NativeAdManager {
 
         String adUnitId = config.isTestMode() ? TestAdIds.ADMOB_NATIVE_ID : config.getAdMobNativeId();
         if (adUnitId == null || adUnitId.isEmpty()) {
-            if (listener != null)
-                listener.onAdFailed("No AdMob ID provided.");
+            if (config.isHouseAdsEnabled()) {
+                SmartAdsLogger.d("AdMob Native ID not set. Trying House Ad.");
+                loadHouseNative(activity, adContainer, layoutRes, config, listener);
+            }
             return;
         }
 
+        SmartAdsLogger.d("Loading Native Ad...");
+
         AdLoader.Builder builder = new AdLoader.Builder(activity, adUnitId);
         builder.forNativeAd(nativeAd -> {
+            SmartAdsLogger.d("✅ Native Ad LOADED.");
+            nativeAd.setOnPaidEventListener(adValue -> {
+                SmartAds.getInstance().reportPaidEvent(adValue, nativeAd.getResponseInfo(), adUnitId, "Native");
+            });
             if (!isContainerActive(adContainer)) {
                 try {
                     nativeAd.destroy();
@@ -77,44 +91,50 @@ public class NativeAdManager {
                 }
                 return;
             }
-            if (currentAdMobNative != null) {
-                currentAdMobNative.destroy();
+
+            // Destroy previous ad in this container if exists
+            NativeAd previousAd = activeAds.get(adContainer);
+            if (previousAd != null) {
+                previousAd.destroy();
             }
-            currentAdMobNative = nativeAd;
+            activeAds.put(adContainer, nativeAd);
+
             NativeAdView adView = (NativeAdView) LayoutInflater.from(activity).inflate(layoutRes, adContainer, false);
             populateAdMobNativeAdView(nativeAd, adView);
             adContainer.removeAllViews();
             adContainer.addView(adView);
             if (listener != null)
                 listener.onAdLoaded(adView);
-            retryAttempt = 0;
         });
 
         AdLoader adLoader = builder.withAdListener(new com.google.android.gms.ads.AdListener() {
             @Override
             public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                if (listener != null)
-                    listener.onAdFailed(loadAdError.getMessage());
-                scheduleRetry(activity, adContainer, layoutRes, config, listener);
+                com.partharoypc.smartads.SmartAdsLogger.e("❌ Native Ad Failed to Load: " + loadAdError.getMessage());
+                // FALLBACK TO HOUSE NATIVE
+                if (config.isHouseAdsEnabled()) {
+                    loadHouseNative(activity, adContainer, layoutRes, config, listener);
+                }
             }
 
             @Override
             public void onAdClicked() {
+                com.partharoypc.smartads.SmartAdsLogger.d("Native Ad Clicked.");
                 if (listener != null)
                     listener.onAdClicked();
             }
 
             @Override
             public void onAdImpression() {
+                com.partharoypc.smartads.SmartAdsLogger.d("Native Ad Impression.");
                 if (listener != null)
                     listener.onAdImpression();
             }
         }).build();
 
-        // Attach Paid Event Listener to the loaded native ad in forNativeAd callback
-        // This is handled inside forNativeAd block above
-
         adLoader.loadAd(new AdRequest.Builder().build());
+
+        // Ensure we clean up when container is detached (e.g. in RecyclerView)
         if (listenerAdded.get(adContainer) == null) {
             adContainer.addOnAttachStateChangeListener(new android.view.View.OnAttachStateChangeListener() {
                 @Override
@@ -127,6 +147,33 @@ public class NativeAdManager {
                 }
             });
             listenerAdded.put(adContainer, Boolean.TRUE);
+        }
+    }
+
+    private void loadHouseNative(Activity activity, FrameLayout adContainer, @LayoutRes int layoutRes,
+            SmartAdsConfig config,
+            NativeAdListener listener) {
+        HouseAd houseAd = HouseAdLoader.selectAd(config.getHouseAds());
+        if (houseAd == null) {
+            com.partharoypc.smartads.SmartAdsLogger.e("No House Native Ad available.");
+            if (listener != null)
+                listener.onAdFailed("AdMob failed and no House Ads available.");
+            return;
+        }
+
+        com.partharoypc.smartads.SmartAdsLogger.d("Showing House Native Ad.");
+
+        // Inflate the same layout. Even if root is NativeAdView, we treat it as View.
+        View adView = LayoutInflater.from(activity).inflate(layoutRes, adContainer, false);
+
+        // Populate standard views
+        HouseAdLoader.populateView(adView, houseAd);
+
+        adContainer.removeAllViews();
+        adContainer.addView(adView);
+
+        if (listener != null) {
+            listener.onAdLoaded(adView);
         }
     }
 
@@ -204,9 +251,9 @@ public class NativeAdManager {
 
     public void destroy(FrameLayout adContainer) {
         try {
-            if (currentAdMobNative != null) {
-                currentAdMobNative.destroy();
-                currentAdMobNative = null;
+            NativeAd ad = activeAds.remove(adContainer);
+            if (ad != null) {
+                ad.destroy();
             }
         } catch (Exception ignored) {
         }
@@ -217,17 +264,7 @@ public class NativeAdManager {
     }
 
     private boolean isContainerActive(FrameLayout adContainer) {
-        if (adContainer.getWindowToken() == null)
-            return false;
-        if (adContainer.getVisibility() != View.VISIBLE)
-            return false;
-        return adContainer.isShown();
-    }
-
-    private void scheduleRetry(Activity activity, FrameLayout adContainer, @LayoutRes int layoutRes,
-            SmartAdsConfig config, NativeAdListener listener) {
-        long delay = (long) Math.min(60_000L, Math.pow(2, Math.max(0, retryAttempt)) * 1000L);
-        retryAttempt = Math.min(retryAttempt + 1, 10);
-        handler.postDelayed(() -> loadAdMob(activity, adContainer, layoutRes, config, listener), delay);
+        // Relaxed check: allow loading even if not yet fully attached.
+        return adContainer != null;
     }
 }
