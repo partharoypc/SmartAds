@@ -109,8 +109,10 @@ SmartAds.initialize(this, config);
 | `setFacebookMediationEnabled(boolean)` | Verification for Meta Audience Network. |
 | `setAppLovinMediationEnabled(boolean)` | Verification for AppLovin. |
 | `setUnityMediationEnabled(boolean)` | Verification for Unity Ads. |
-| `setLoadingDialogText(String)` | Custom text for the full-screen ad loading dialog (e.g., "Please wait..."). |
-| `setLoadingDialogColor(bg, text)` | Custom background and text colors for the loading dialog. |
+| `setLoadingDialogText(String headline, String sub)` | Custom headline and sub-text for valid loading dialog. |
+| `setLoadingDialogColor(bg, text)` | Custom background and text/headline colors. |
+| `setLoadingDialogSubTextColor(int)` | Custom color for the sub-text (default is secondary text color). |
+| `setLoadingDialogProgressColor(int)` | Custom color for the circular progress indicator. |
 | `setMaxAdContentRating(String)` | Set content rating: `G`, `PG`, `T`, `MA`. |
 | `setTagForChildDirectedTreatment(int)` | COPPA compliance (`TAG_FOR_CHILD_DIRECTED_TREATMENT_TRUE`). |
 | `setTagForUnderAgeOfConsent(int)` | GDPR compliance (`TAG_FOR_UNDER_AGE_OF_CONSENT_TRUE`). |

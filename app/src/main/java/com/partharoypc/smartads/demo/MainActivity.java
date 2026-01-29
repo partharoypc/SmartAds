@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
     private FrameLayout nativeContainer;
 
     // Debug Utilities
-    private Button btnAdInspector, btnPrivacyOptions, btnShutdownSdk;
+    private Button btnAdInspector, btnPrivacyOptions, btnShutdownSdk, btnPreviewLoadingDialog;
 
     // Logger
     private TextView textLogger;
@@ -131,6 +131,7 @@ public class MainActivity extends AppCompatActivity {
         btnAdInspector = findViewById(R.id.btn_ad_inspector);
         btnPrivacyOptions = findViewById(R.id.btn_privacy_options);
         btnShutdownSdk = findViewById(R.id.btn_shutdown_sdk);
+        btnPreviewLoadingDialog = findViewById(R.id.btn_preview_loading_dialog);
 
         // Logs
         textLogger = findViewById(R.id.text_logger);
@@ -227,6 +228,18 @@ public class MainActivity extends AppCompatActivity {
                 log("Shutdown Error: " + e.getMessage());
             }
         });
+
+        btnPreviewLoadingDialog.setOnClickListener(v -> {
+            log("Previewing Loading Dialog for 3 seconds...");
+            com.partharoypc.smartads.ui.LoadingAdDialog dialog = new com.partharoypc.smartads.ui.LoadingAdDialog(this);
+            dialog.show("Loading Ad...", null, null);
+
+            // Dismiss after 3 seconds
+            new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+                dialog.dismiss();
+                log("Loading Dialog Dismissed (Preview ended)");
+            }, 3000);
+        });
     }
 
     private void disableAllAdButtons() {
@@ -241,7 +254,9 @@ public class MainActivity extends AppCompatActivity {
         btnVerifyMediation.setEnabled(false);
         btnAdInspector.setEnabled(false);
         btnPrivacyOptions.setEnabled(false);
+        btnPrivacyOptions.setEnabled(false);
         btnShutdownSdk.setEnabled(false);
+        btnPreviewLoadingDialog.setEnabled(false);
 
         textSdkStatus.setText(R.string.sdk_shutdown_message);
         textSdkStatus.setTextColor(ContextCompat.getColor(this, R.color.red_error));

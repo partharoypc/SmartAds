@@ -36,15 +36,15 @@ public class SmartAdsConfig {
     // UI Customization
     private final Integer dialogBackgroundColor;
     private final Integer dialogTextColor;
+    private final Integer dialogSubTextColor;
+    private final Integer dialogProgressColor;
     private final String dialogText;
+    private final String dialogSubText;
 
     // Testing & House Ads
     private final List<String> testDeviceIds;
     private final List<HouseAd> houseAds;
 
-    /**
-     * Creates a Builder populated with the current configuration.
-     */
     public Builder toBuilder() {
         return new Builder(this);
     }
@@ -74,7 +74,10 @@ public class SmartAdsConfig {
 
         this.dialogBackgroundColor = builder.dialogBackgroundColor;
         this.dialogTextColor = builder.dialogTextColor;
+        this.dialogSubTextColor = builder.dialogSubTextColor;
+        this.dialogProgressColor = builder.dialogProgressColor;
         this.dialogText = builder.dialogText;
+        this.dialogSubText = builder.dialogSubText;
 
         this.testDeviceIds = List.copyOf(builder.testDeviceIds);
         this.houseAds = List.copyOf(builder.houseAds);
@@ -164,8 +167,20 @@ public class SmartAdsConfig {
         return dialogTextColor;
     }
 
+    public Integer getDialogSubTextColor() {
+        return dialogSubTextColor;
+    }
+
+    public Integer getDialogProgressColor() {
+        return dialogProgressColor;
+    }
+
     public String getDialogText() {
         return dialogText;
+    }
+
+    public String getDialogSubText() {
+        return dialogSubText;
     }
 
     public List<String> getTestDeviceIds() {
@@ -241,7 +256,10 @@ public class SmartAdsConfig {
         // UI
         private Integer dialogBackgroundColor = null;
         private Integer dialogTextColor = null;
+        private Integer dialogSubTextColor = null;
+        private Integer dialogProgressColor = null;
         private String dialogText = "Loading Ad...";
+        private String dialogSubText = "Optimizing experience...";
 
         // Lists
         private final List<String> testDeviceIds = new ArrayList<>();
@@ -278,7 +296,10 @@ public class SmartAdsConfig {
 
             this.dialogBackgroundColor = config.dialogBackgroundColor;
             this.dialogTextColor = config.dialogTextColor;
+            this.dialogSubTextColor = config.dialogSubTextColor;
+            this.dialogProgressColor = config.dialogProgressColor;
             this.dialogText = config.dialogText;
+            this.dialogSubText = config.dialogSubText;
 
             this.testDeviceIds.addAll(config.testDeviceIds);
             this.houseAds.addAll(config.houseAds);
@@ -412,8 +433,24 @@ public class SmartAdsConfig {
             return this;
         }
 
-        public Builder setLoadingDialogText(String text) {
-            this.dialogText = text;
+        public Builder setLoadingDialogSubTextColor(@androidx.annotation.ColorInt int subTextColor) {
+            this.dialogSubTextColor = subTextColor;
+            return this;
+        }
+
+        public Builder setLoadingDialogProgressColor(@androidx.annotation.ColorInt int progressColor) {
+            this.dialogProgressColor = progressColor;
+            return this;
+        }
+
+        public Builder setLoadingDialogText(String headline, String subHeadline) {
+            this.dialogText = headline;
+            this.dialogSubText = subHeadline;
+            return this;
+        }
+
+        public Builder setLoadingDialogText(String headline) {
+            this.dialogText = headline;
             return this;
         }
 

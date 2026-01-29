@@ -1,5 +1,6 @@
 package com.partharoypc.smartads.ui;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
@@ -9,15 +10,11 @@ import android.graphics.drawable.ColorDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
-import android.widget.ProgressBar;
+
 import android.widget.TextView;
 
 import com.partharoypc.smartads.R;
 
-/**
- * Professional loading dialog used while fetching ads.
- * Now uses an XML-based layout for a premium look and feel.
- */
 public class LoadingAdDialog {
     private final Context context;
     private Dialog dialog;
@@ -25,11 +22,46 @@ public class LoadingAdDialog {
     public LoadingAdDialog(Context context) {
         this.context = context;
     }
+    private String headline;
+    private String subHeadline;
+    private Integer backgroundColor;
+    private Integer headlineColor;
+    private Integer subHeadlineColor;
+    private Integer progressColor;
 
-    public void show(String message, Integer backgroundColor, Integer textColor) {
-        if (!(context instanceof Activity))
+    public LoadingAdDialog setHeadline(String headline) {
+        this.headline = headline;
+        return this;
+    }
+
+    public LoadingAdDialog setSubHeadline(String subHeadline) {
+        this.subHeadline = subHeadline;
+        return this;
+    }
+
+    public LoadingAdDialog setBackgroundColor(int color) {
+        this.backgroundColor = color;
+        return this;
+    }
+
+    public LoadingAdDialog setHeadlineColor(int color) {
+        this.headlineColor = color;
+        return this;
+    }
+
+    public LoadingAdDialog setSubHeadlineColor(int color) {
+        this.subHeadlineColor = color;
+        return this;
+    }
+
+    public LoadingAdDialog setProgressColor(int color) {
+        this.progressColor = color;
+        return this;
+    }
+
+    public void show(String message, Integer bgColor, Integer txtColor) {
+        if (!(context instanceof Activity activity))
             return;
-        Activity activity = (Activity) context;
         if (activity.isFinishing() || activity.isDestroyed())
             return;
 
@@ -40,35 +72,55 @@ public class LoadingAdDialog {
         dialog.setCancelable(false);
         if (dialog.getWindow() != null) {
             dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-            // Add fade animation
             dialog.getWindow().getAttributes().windowAnimations = android.R.style.Animation_Dialog;
         }
 
+        @SuppressLint("InflateParams")
         View view = LayoutInflater.from(activity).inflate(R.layout.dialog_loading_ad, null);
 
-        View container = view.findViewById(R.id.dialog_container);
-        ProgressBar progressBar = view.findViewById(R.id.loading_progress);
-        TextView textView = view.findViewById(R.id.loading_message);
+        View cardView = view.findViewById(R.id.dialog_card);
+        View progressBar = view.findViewById(R.id.loading_progress);
+        TextView titleView = view.findViewById(R.id.loading_message);
+        TextView subtitleView = view.findViewById(R.id.loading_submessage);
 
-        // Set Message
-        if (message != null && !message.isEmpty()) {
-            textView.setText(message);
-        } else {
-            textView.setText(R.string.smartads_loading_ad);
+        String finalHeadline = (message != null) ? message : this.headline;
+        if (finalHeadline != null)
+            titleView.setText(finalHeadline);
+        else
+            titleView.setText(R.string.smartads_loading_ad);
+
+        if (subHeadline != null) {
+            subtitleView.setText(subHeadline);
+            subtitleView.setVisibility(View.VISIBLE);
         }
 
-        // Apply Custom Background Color if provided
-        if (backgroundColor != null) {
-            container.setBackgroundTintList(ColorStateList.valueOf(backgroundColor));
+        Integer finalBgColor = (bgColor != null) ? bgColor : this.backgroundColor;
+        if (finalBgColor != null && cardView instanceof com.google.android.material.card.MaterialCardView) {
+            ((com.google.android.material.card.MaterialCardView) cardView).setCardBackgroundColor(finalBgColor);
         }
 
-        // Apply Custom Text Color if provided
-        if (textColor != null) {
-            textView.setTextColor(textColor);
-            progressBar.setIndeterminateTintList(ColorStateList.valueOf(textColor));
+        Integer finalTxtColor = (txtColor != null) ? txtColor : this.headlineColor;
+        if (finalTxtColor != null) {
+            titleView.setTextColor(finalTxtColor);
+        }
+
+        if (subHeadlineColor != null) {
+            subtitleView.setTextColor(subHeadlineColor);
+        }
+
+        Integer finalProgressColor = (txtColor != null) ? txtColor : this.progressColor; // Fallback to txtColor if
+        if (finalProgressColor != null
+                && progressBar instanceof com.google.android.material.progressindicator.CircularProgressIndicator) {
+            ((com.google.android.material.progressindicator.CircularProgressIndicator) progressBar)
+                    .setIndicatorColor(finalProgressColor);
         }
 
         dialog.setContentView(view);
+
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setLayout(android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                    android.view.ViewGroup.LayoutParams.MATCH_PARENT);
+        }
 
         if (!activity.isFinishing() && !activity.isDestroyed()) {
             try {

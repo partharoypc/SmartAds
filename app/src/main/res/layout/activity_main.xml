@@ -675,6 +675,17 @@
                         </LinearLayout>
 
                         <Button
+                            android:id="@+id/btn_preview_loading_dialog"
+                            style="@style/Widget.MaterialComponents.Button.TextButton"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:text="Preview Loading Dialog"
+                            android:textColor="@color/colorPrimary"
+                            app:icon="@android:drawable/ic_menu_view"
+                            app:iconTint="@color/colorPrimary" />
+
+                        <Button
                             android:id="@+id/btn_shutdown_sdk"
                             style="@style/Widget.MaterialComponents.Button.TextButton"
                             android:layout_width="match_parent"
