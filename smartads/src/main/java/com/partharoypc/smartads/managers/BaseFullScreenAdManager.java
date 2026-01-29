@@ -8,6 +8,7 @@ import android.os.Looper;
 import com.partharoypc.smartads.AdStatus;
 import com.partharoypc.smartads.SmartAds;
 import com.partharoypc.smartads.SmartAdsConfig;
+import com.partharoypc.smartads.SmartAdsLogger;
 import com.partharoypc.smartads.ui.LoadingAdDialog;
 
 public abstract class BaseFullScreenAdManager {
@@ -48,10 +49,17 @@ public abstract class BaseFullScreenAdManager {
     }
 
     protected void dismissLoadingDialog() {
-        if (loadingDialog != null) {
-            loadingDialog.dismiss();
-            loadingDialog = null;
-        }
+        handler.post(() -> {
+            if (loadingDialog != null) {
+                try {
+                    loadingDialog.dismiss();
+                    SmartAdsLogger.d("Loading dialog dismissed.");
+                } catch (Exception e) {
+                    SmartAdsLogger.e("Error dismissing loading dialog: " + e.getMessage());
+                }
+                loadingDialog = null;
+            }
+        });
     }
 
     protected void scheduleRetry(Context context, SmartAdsConfig config, Runnable loadAction) {

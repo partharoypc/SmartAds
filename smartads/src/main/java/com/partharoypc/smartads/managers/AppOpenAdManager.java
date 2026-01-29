@@ -227,10 +227,27 @@ public class AppOpenAdManager extends BaseFullScreenAdManager
                     @Override
                     public void onAdImpression() {
                         adStatus = AdStatus.SHOWN;
+                        isShowingAd = true;
                         if (developerListener != null)
                             developerListener.onAdImpression();
                     }
                 });
+    }
+
+    public boolean isShowingAd() {
+        return isShowingAd;
+    }
+
+    public void destroy(Application application) {
+        if (application != null) {
+            application.unregisterActivityLifecycleCallbacks(this);
+            ProcessLifecycleOwner.get().getLifecycle().removeObserver(this);
+        }
+        appOpenAd = null;
+        currentActivity = null;
+        developerListener = null;
+        isShowingAd = false;
+        SmartAdsLogger.d("AppOpenAdManager destroyed.");
     }
 
     private boolean isAdFresh() {

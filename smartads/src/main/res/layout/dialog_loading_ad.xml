@@ -34,23 +34,21 @@
             android:fontFamily="sans-serif-medium"
             android:gravity="center"
             android:letterSpacing="0.02"
-            android:text="Loading Ad..."
+            android:text="@string/smartads_loading_ad"
             android:textAlignment="center"
             android:textColor="@color/ad_headline"
             android:textSize="18sp"
-            android:textStyle="bold"
-            tools:ignore="HardcodedText" />
+            android:textStyle="bold" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:gravity="center"
-            android:text="Optimizing your experience"
+            android:text="@string/smartads_loading_optimizing"
             android:textAlignment="center"
             android:textColor="@color/text_secondary"
-            android:textSize="13sp"
-            tools:ignore="HardcodedText" />
+            android:textSize="13sp" />
 
     </LinearLayout>
 

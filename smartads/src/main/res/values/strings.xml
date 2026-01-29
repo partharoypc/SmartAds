@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Ad Labels -->
+    <string name="smartads_label_ad">AD</string>
+    <string name="smartads_label_sponsored">Sponsored</string>
+    
+    <!-- Loading Dialog -->
+    <string name="smartads_loading_ad">Loading Ad...</string>
+    <string name="smartads_loading_optimizing">Optimizing your experience</string>
+    
+    <!-- Fallback / Placeholders -->
+    <string name="smartads_fallback_cta">GET IT NOW</string>
+    <string name="smartads_fallback_headline">Discover amazing apps</string>
+    <string name="smartads_fallback_body">Try out this awesome application from our partner network.</string>
+</resources>

@@ -41,11 +41,11 @@
                     android:backgroundTint="@color/ad_badge_bg"
                     android:paddingHorizontal="6dp"
                     android:paddingVertical="1dp"
-                    android:text="AD"
+                    android:text="@string/smartads_label_ad"
                     android:textColor="@color/ad_badge_text"
                     android:textSize="8sp"
                     android:textStyle="bold"
-                    tools:ignore="HardcodedText,SmallSp" />
+                    tools:ignore="SmallSp" />
             </FrameLayout>
 
             <LinearLayout
@@ -97,14 +97,13 @@
                 android:insetTop="0dp"
                 android:insetBottom="0dp"
                 android:paddingHorizontal="16dp"
-                android:text="OPEN"
+                android:text="@string/smartads_fallback_cta"
                 android:textAllCaps="true"
                 android:textColor="@color/ad_call_to_action_text"
                 android:textSize="12sp"
                 android:textStyle="bold"
                 app:backgroundTint="@color/ad_call_to_action_bg"
-                app:cornerRadius="10dp"
-                tools:ignore="HardcodedText" />
+                app:cornerRadius="10dp" />
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 

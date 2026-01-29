@@ -29,11 +29,11 @@
             android:backgroundTint="@color/ad_badge_bg"
             android:paddingHorizontal="6dp"
             android:paddingVertical="1dp"
-            android:text="AD"
+            android:text="@string/smartads_label_ad"
             android:textColor="@color/ad_badge_text"
             android:textSize="8sp"
             android:textStyle="bold"
-            tools:ignore="HardcodedText,SmallSp" />
+            tools:ignore="SmallSp" />
 
     </FrameLayout>
 </com.google.android.material.card.MaterialCardView>

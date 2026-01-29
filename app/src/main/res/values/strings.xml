@@ -27,6 +27,7 @@
     <string name="btn_load_native">Load Native</string>
     <string name="btn_ad_inspector">Ad Inspector</string>
     <string name="btn_privacy">Privacy Options</string>
+    <string name="btn_shutdown">Shutdown SDK</string>
     <string name="btn_clear_logs">Clear Logs</string>
     <string name="btn_toggle_ads">Toggle Ads</string>
     <string name="btn_verify_mediation">Verify Mediation</string>

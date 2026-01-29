@@ -47,14 +47,16 @@ public class SmartAds {
     }
 
     private void requestUmpWithActivity(Application application) {
+        if (appOpenAdManager == null)
+            return;
         ConsentRequestParameters params = new ConsentRequestParameters.Builder().build();
         ConsentInformation consentInformation = UserMessagingPlatform.getConsentInformation(application);
         consentInformation.requestConsentInfoUpdate(
-                (appOpenAdManager != null) ? appOpenAdManager.getCurrentActivityForUmp() : null,
+                appOpenAdManager.getCurrentActivityForUmp(),
                 params,
                 () -> {
                     UserMessagingPlatform.loadAndShowConsentFormIfRequired(
-                            appOpenAdManager != null ? appOpenAdManager.getCurrentActivityForUmp() : null,
+                            appOpenAdManager.getCurrentActivityForUmp(),
                             formError -> initializeSdks(application));
                 },
                 requestConsentError -> initializeSdks(application));
@@ -78,18 +80,22 @@ public class SmartAds {
         }
     }
 
-    /**
-     * Returns the singleton instance of SmartAds.
-     *
-     * @return The SmartAds instance.
-     * @throws IllegalStateException if initialize() has not been called.
-     */
     public static SmartAds getInstance() {
         if (instance == null) {
             throw new IllegalStateException(
-                    "SmartAds.initialize() must be called in your Application class before use.");
+                    "SmartAds not initialized. You must call SmartAds.initialize(application, config) " +
+                            "before calling getInstance(). Use SmartAds.isInitialized() to check status.");
         }
         return instance;
+    }
+
+    /**
+     * Checks if the SmartAds SDK is currently initialized and ready to use.
+     *
+     * @return true if initialized, false otherwise.
+     */
+    public static boolean isInitialized() {
+        return instance != null;
     }
 
     /**
@@ -99,13 +105,6 @@ public class SmartAds {
         return "5.0.0";
     }
 
-    /**
-     * Initializes the SmartAds library.
-     * This must be called in your Application class's onCreate() method.
-     *
-     * @param application The Android Application instance.
-     * @param config      The configuration for the ads library.
-     */
     @RequiresPermission(Manifest.permission.INTERNET)
     public static void initialize(Application application, SmartAdsConfig config) {
         if (instance == null) {
@@ -135,12 +134,12 @@ public class SmartAds {
 
                     MobileAds.setRequestConfiguration(rcBuilder.build());
 
+                    instance.initializeManagersIfNeeded(application);
+
                     // UMP Consent (optional)
                     if (config.useUmpConsent()) {
-                        instance.initializeManagersIfNeeded(application);
                         instance.requestUmpWithActivity(application);
                     } else {
-                        instance.initializeManagersIfNeeded(application);
                         instance.initializeSdks(application);
                     }
 
@@ -151,6 +150,28 @@ public class SmartAds {
                 }
             }
         }
+    }
+
+    /**
+     * Fully shuts down the SmartAds library, unregistering listeners and clearing
+     * managers.
+     * Should be called if the application is being destroyed or if you want to stop
+     * ad services completely.
+     */
+    public void shutdown() {
+        if (application != null && appOpenAdManager != null) {
+            appOpenAdManager.destroy(application);
+        }
+        config = null;
+        appOpenAdManager = null;
+        interstitialAdManager = null;
+        rewardedAdManager = null;
+        bannerAdManager = null;
+        nativeAdManager = null;
+        analyticsListener = null;
+        application = null;
+        instance = null;
+        SmartAdsLogger.d("SmartAds SDK Shutdown complete.");
     }
 
     /**
@@ -438,14 +459,11 @@ public class SmartAds {
         return rewardedAdManager.getAdStatus();
     }
 
-    /**
-     * Checks if any full screen ad (Interstitial, Rewarded, or App Open) is
-     * currently showing.
-     */
     public boolean isAnyAdShowing() {
         boolean interShowing = interstitialAdManager != null && interstitialAdManager.getAdStatus() == AdStatus.SHOWN;
         boolean rewardedShowing = rewardedAdManager != null && rewardedAdManager.getAdStatus() == AdStatus.SHOWN;
-        boolean appOpenShowing = appOpenAdManager != null && appOpenAdManager.getAdStatus() == AdStatus.SHOWN;
+        boolean appOpenShowing = appOpenAdManager != null
+                && (appOpenAdManager.getAdStatus() == AdStatus.SHOWN || appOpenAdManager.isShowingAd());
         return interShowing || rewardedShowing || appOpenShowing;
     }
 

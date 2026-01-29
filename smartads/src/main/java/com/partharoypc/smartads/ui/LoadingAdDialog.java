@@ -51,8 +51,10 @@ public class LoadingAdDialog {
         TextView textView = view.findViewById(R.id.loading_message);
 
         // Set Message
-        if (message != null) {
+        if (message != null && !message.isEmpty()) {
             textView.setText(message);
+        } else {
+            textView.setText(R.string.smartads_loading_ad);
         }
 
         // Apply Custom Background Color if provided

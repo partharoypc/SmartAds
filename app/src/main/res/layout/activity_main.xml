@@ -673,6 +673,17 @@
                                 android:text="@string/btn_privacy"
                                 android:textColor="@color/text_secondary" />
                         </LinearLayout>
+
+                        <Button
+                            android:id="@+id/btn_shutdown_sdk"
+                            style="@style/Widget.MaterialComponents.Button.TextButton"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:text="@string/btn_shutdown"
+                            android:textColor="#EF4444"
+                            app:icon="@android:drawable/ic_menu_close_clear_cancel"
+                            app:iconTint="#EF4444" />
                     </LinearLayout>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>

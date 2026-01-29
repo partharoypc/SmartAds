@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
     private FrameLayout nativeContainer;
 
     // Debug Utilities
-    private Button btnAdInspector, btnPrivacyOptions;
+    private Button btnAdInspector, btnPrivacyOptions, btnShutdownSdk;
 
     // Logger
     private TextView textLogger;
@@ -130,6 +130,7 @@ public class MainActivity extends AppCompatActivity {
         // Debug
         btnAdInspector = findViewById(R.id.btn_ad_inspector);
         btnPrivacyOptions = findViewById(R.id.btn_privacy_options);
+        btnShutdownSdk = findViewById(R.id.btn_shutdown_sdk);
 
         // Logs
         textLogger = findViewById(R.id.text_logger);
@@ -211,9 +212,47 @@ public class MainActivity extends AppCompatActivity {
                 showSnackbar("Privacy Options not required");
             }
         });
+
+        btnShutdownSdk.setOnClickListener(v -> {
+            log("🛑 Shutting down SmartAds SDK...");
+            try {
+                SmartAds.getInstance().shutdown();
+                log("SDK Shutdown complete. Resources cleared.");
+                updateSdkStatus();
+                showSnackbar("SmartAds Shutdown");
+
+                // Disable all ad buttons
+                disableAllAdButtons();
+            } catch (Exception e) {
+                log("Shutdown Error: " + e.getMessage());
+            }
+        });
+    }
+
+    private void disableAllAdButtons() {
+        btnLoadBanner.setEnabled(false);
+        btnLoadCollapsible.setEnabled(false);
+        btnLoadInterstitial.setEnabled(false);
+        btnShowInterstitial.setEnabled(false);
+        btnLoadRewarded.setEnabled(false);
+        btnShowRewarded.setEnabled(false);
+        btnShowAppOpen.setEnabled(false);
+        btnLoadNative.setEnabled(false);
+        btnVerifyMediation.setEnabled(false);
+        btnAdInspector.setEnabled(false);
+        btnPrivacyOptions.setEnabled(false);
+        btnShutdownSdk.setEnabled(false);
+
+        textSdkStatus.setText("SDK Shutdown • Restart App to use ads");
+        textSdkStatus.setTextColor(ContextCompat.getColor(this, R.color.red_error));
     }
 
     private void updateSdkStatus() {
+        if (!SmartAds.isInitialized()) {
+            textSdkStatus.setText("SDK Not Initialized");
+            textSdkStatus.setTextColor(ContextCompat.getColor(this, R.color.red_error));
+            return;
+        }
         com.partharoypc.smartads.SmartAdsConfig config = SmartAds.getInstance().getConfig();
         boolean isTestMode = config.isTestMode();
         boolean areAdsEnabled = config.isAdsEnabled();
@@ -250,6 +289,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateMediationConfig(boolean fb, boolean applovin, boolean unity) {
+        if (!SmartAds.isInitialized())
+            return;
         // Create new config based on current one
         com.partharoypc.smartads.SmartAdsConfig current = SmartAds.getInstance().getConfig();
         com.partharoypc.smartads.SmartAdsConfig newConfig = current.toBuilder()
@@ -271,6 +312,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateAdStatuses() {
+        if (!SmartAds.isInitialized())
+            return;
+
         // App Open Ad Status Update
         if (SmartAds.getInstance().isAppOpenAdAvailable()) {
             setStatus(statusAppOpen, "Available", R.color.green_success);
@@ -474,7 +518,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        SmartAds.getInstance().destroyBannerIn(bannerContainer);
-        SmartAds.getInstance().clearNativeIn(nativeContainer);
+        if (SmartAds.isInitialized()) {
+            SmartAds.getInstance().destroyBannerIn(bannerContainer);
+            SmartAds.getInstance().clearNativeIn(nativeContainer);
+        }
     }
 }
