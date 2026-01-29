@@ -1,28 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    app:cardBackgroundColor="#FFFFFF"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="2dp">
 
-    <ImageView
-        android:id="@+id/house_banner_image"
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:contentDescription="Ad Content"
-        android:scaleType="fitXY"
-        tools:ignore="HardcodedText" />
+        android:layout_height="match_parent">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="top|start"
-        android:background="#FFC107"
-        android:paddingHorizontal="4dp"
-        android:paddingVertical="1dp"
-        android:text="Ad"
-        android:textColor="#FFFFFF"
-        android:textSize="10sp"
-        android:textStyle="bold"
-        tools:ignore="HardcodedText,SmallSp" />
+        <ImageView
+            android:id="@+id/house_banner_image"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:contentDescription="Ad Content"
+            android:scaleType="fitXY"
+            tools:ignore="HardcodedText" />
 
-</FrameLayout>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|start"
+            android:layout_margin="4dp"
+            android:background="@drawable/rounded_status_bg"
+            android:backgroundTint="@color/ad_badge_bg"
+            android:paddingHorizontal="6dp"
+            android:paddingVertical="1dp"
+            android:text="AD"
+            android:textColor="@color/ad_badge_text"
+            android:textSize="8sp"
+            android:textStyle="bold"
+            tools:ignore="HardcodedText,SmallSp" />
+
+    </FrameLayout>
+</com.google.android.material.card.MaterialCardView>

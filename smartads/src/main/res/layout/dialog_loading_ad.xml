@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/dialog_container"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_gravity="center"
-    android:minWidth="320dp"
-    app:cardBackgroundColor="@android:color/white"
-    app:cardCornerRadius="16dp"
+    android:layout_margin="32dp"
+    app:cardBackgroundColor="#FFFFFF"
+    app:cardCornerRadius="24dp"
     app:cardElevation="10dp">
 
     <LinearLayout
@@ -16,37 +17,40 @@
         android:gravity="center"
         android:orientation="vertical"
         android:paddingHorizontal="24dp"
-        android:paddingVertical="32dp">
+        android:paddingVertical="40dp">
 
         <ProgressBar
             android:id="@+id/loading_progress"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
             android:gravity="center"
-            android:indeterminateTint="?attr/colorPrimary" />
+            android:indeterminateTint="@color/colorPrimary" />
 
         <TextView
             android:id="@+id/loading_message"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="28dp"
             android:fontFamily="sans-serif-medium"
             android:gravity="center"
             android:letterSpacing="0.02"
             android:text="Loading Ad..."
             android:textAlignment="center"
-            android:textColor="@color/text_primary"
-            android:textSize="16sp" />
+            android:textColor="@color/ad_headline"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            tools:ignore="HardcodedText" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:gravity="center"
-            android:text="Please wait a moment"
+            android:text="Optimizing your experience"
             android:textAlignment="center"
             android:textColor="@color/text_secondary"
-            android:textSize="12sp" />
+            android:textSize="13sp"
+            tools:ignore="HardcodedText" />
 
     </LinearLayout>
 
