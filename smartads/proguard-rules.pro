@@ -48,7 +48,22 @@
 -keep class com.google.android.ump.** { *; }
 -dontwarn com.google.android.ump.**
 
-# Common attributes
+# --- Mediation Adapters ---
+
+# Meta (Facebook)
+-keep class com.facebook.ads.** { *; }
+-dontwarn com.facebook.ads.**
+
+# AppLovin
+-keep class com.applovin.** { *; }
+-dontwarn com.applovin.**
+
+# Unity Ads
+-keep class com.unity3d.ads.** { *; }
+-keep class com.unity3d.services.** { *; }
+-dontwarn com.unity3d.ads.**
+
+# --- Common attributes ---
 -keepattributes Signature
 -keepattributes *Annotation*
 -keepattributes EnclosingMethod,InnerClasses

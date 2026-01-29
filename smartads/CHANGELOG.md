@@ -2,6 +2,25 @@
 
 All notable changes to the **SmartAds** library will be documented in this file.
 
+## [5.0.0] - 2026-01-29
+
+### Added
+- **Revenue Tracking (ILRD)**: Re-introduced `onAdRevenuePaid` callbacks with a simplified `SmartAdsAnalyticsListener` for precision ROI tracking.
+- **House Ads System**: Built-in support for internal cross-promotion with weighted random selection and rich UI (Icon, Media, Rating, CTA).
+- **Comprehensive Mediation Verification**: Added `verifyMediation()` tool to detect Meta, AppLovin, and Unity adapters at runtime.
+- **Adaptive & Collapsible Banners**: Native support for building modern, high-conversion banner layouts.
+- **Enhanced Native Templates**: Full support for Small, Medium, and Large native templates alongside completely custom XML layouts.
+- **AdMob Inspector & Test Suite**: Easy-to-use hooks for launching official AdMob debug and mediation test tools.
+- **Multi-SDK Calibration**: Targeted API Level 36 and updated all core dependencies for maximum performance.
+
+### Changed
+- **AdMob SDK Update**: Upgraded to Google Mobile Ads SDK `v24.9.0`.
+- **Streamlined Configuration**: Centralized all settings within `SmartAdsConfig.Builder` with over 20+ customizable parameters.
+- **Premium UI**: Redesigned the full-screen ad loading dialog with customizable colors and animations.
+- **Lifecycle Excellence**: Optimized memory management for all ad formats to ensure zero Activity-leaks.
+
+---
+
 ## [3.0.0] - 2025-12-23
 
 ### Added

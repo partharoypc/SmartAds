@@ -103,10 +103,13 @@ SmartAds.initialize(this, config);
 | `setFacebookMediationEnabled(boolean)` | Verification for Meta Audience Network. |
 | `setAppLovinMediationEnabled(boolean)` | Verification for AppLovin. |
 | `setUnityMediationEnabled(boolean)` | Verification for Unity Ads. |
-| `setLoadingDialogText(String)` | Custom text for the full-screen ad loading dialog. |
-| `setLoadingDialogColor(bg, text)` | Custom colors for the loading dialog. |
-| `setMaxAdContentRating(String)` | Set content rating (G, PG, T, MA). |
-| `setTagForChildDirectedTreatment(int)` | COPPA compliance. |
+| `setLoadingDialogText(String)` | Custom text for the full-screen ad loading dialog (e.g., "Please wait..."). |
+| `setLoadingDialogColor(bg, text)` | Custom background and text colors for the loading dialog. |
+| `setMaxAdContentRating(String)` | Set content rating: `G`, `PG`, `T`, `MA`. |
+| `setTagForChildDirectedTreatment(int)` | COPPA compliance (`TAG_FOR_CHILD_DIRECTED_TREATMENT_TRUE`). |
+| `setTagForUnderAgeOfConsent(int)` | GDPR compliance (`TAG_FOR_UNDER_AGE_OF_CONSENT_TRUE`). |
+| `addTestDeviceId(String)` | Add a specific physical device for test ads. |
+| `setHouseAdsEnabled(boolean)` | Globally enable or disable internal promotions. |
 
 ---
 
@@ -206,50 +209,97 @@ SmartAds.getInstance().setAnalyticsListener((adUnitId, adFormat, adNetwork, valu
 
 ---
 
-## 🤝 6. AdMob Mediation Setup Guide
-Improve your fill rates and revenue by integrating 3rd-party ad networks.
+## 🤝 6. Complete Mediation Adapters Setup Guide
+Maximize your revenue by integrating top-tier ad networks. SmartAds makes it easy to verify and manage these integrations.
 
-### **Step 1: Add Mediation Adapters**
-Add the following dependencies to your `app/build.gradle`.
+### **Quick Dependencies (build.gradle)**
+Add these to your app-level `build.gradle` file. Always check for the latest versions on the [Google Mediation Page](https://developers.google.com/admob/android/mediation).
 
 ```gradle
 dependencies {
-    // 🔵 Meta (Facebook) Audience Network
-    implementation 'com.google.ads.mediation:facebook:6.17.0.0'
+    // 🔵 Meta (Facebook)
+    implementation 'com.google.ads.mediation:facebook:6.21.0.0'
 
     // 🔴 AppLovin MAX
-    implementation 'com.google.ads.mediation:applovin:12.4.3.0'
+    implementation 'com.google.ads.mediation:applovin:13.5.1.0'
 
     // 🟢 Unity Ads
-    implementation 'com.google.ads.mediation:unity:4.10.0.0'
+    implementation 'com.google.ads.mediation:unity:4.16.5.0'
 }
 ```
 
-### **Step 2: Network-Specific Setup**
-- **AppLovin**: Add your **AppLovin SDK Key** to `AndroidManifest.xml`:
-  ```xml
-  <meta-data android:name="applovin.sdk.key" android:value="YOUR_SDK_KEY_HERE"/>
-  ```
-- **Verification**: Call `SmartAds.getInstance().verifyMediation(activity);` to check if adapters are detected.
+### **Network-Specific Manifest Setup**
+| Network | Requirement | Implementation |
+|---------|-------------|----------------|
+| **AppLovin** | SDK Key | `<meta-data android:name="applovin.sdk.key" android:value="YOUR_KEY"/>` |
+| **Meta** | None | No extra manifest meta-data needed. |
+| **Unity Ads** | None | Configuration handled via AdMob UI. |
+| **All** | Hardware Accel | `android:hardwareAccelerated="true"` in `<application>` (Recommended). |
+
+### **Recommended ProGuard / R8 Rules**
+If you use `minifyEnabled true`, add these to your `proguard-rules.pro` to prevent ad crashes:
+
+```proguard
+# Google Mobile Ads
+-keep public class com.google.android.gms.ads.** { *; }
+
+# Meta (Facebook)
+-keep class com.facebook.ads.** { *; }
+
+# AppLovin
+-keep class com.applovin.** { *; }
+
+# Unity Ads
+-keep class com.unity3d.ads.** { *; }
+-keep class com.unity3d.services.** { *; }
+```
+
+### **Mediation Verification & Debugging**
+SmartAds provides built-in tools to ensure your mediation is working:
+
+1. **Adapter Detection**:
+   ```java
+   // Logs "✅ Network Name Adapter found" or "❌ NOT found"
+   SmartAds.getInstance().verifyMediation(activity);
+   ```
+2. **AdMob Ad Inspector**:
+   ```java
+   // Gesture-based or manual trigger to see real-time fill status
+   SmartAds.getInstance().launchAdInspector(activity);
+   ```
+3. **Mediation Test Suite**:
+   ```java
+   // Launch the official test UI (requires dependency)
+   SmartAds.getInstance().openMediationTestSuite(activity);
+   ```
 
 ---
 
 ## 🛡️ 7. API Reference (Public Methods)
 
 ### Core
-- `initialize(Application, SmartAdsConfig)`: Setup the SDK.
+- `initialize(Application, SmartAdsConfig)`: Setup the SDK (Call once).
 - `getInstance()`: Access the singleton instance.
-- `getVersion()`: Get current version ("5.0.0").
-- `shutdown()`: Cleanly shut down all ad services.
+- `isInitialized()`: Static check for initialization status.
+- `getVersion()`: Returns "5.0.0".
+- `shutdown()`: Fully stop all ad services and clear memory.
 
-### Ad Control
-- `setAdsEnabled(boolean)`: Enable/Disable ads dynamically.
-- `preloadAds(Context)`: Pre-fetch all configured formats.
-- `isAnyAdShowing()`: Returns true if a full-screen ad is active.
+### Ad Control & Status
+- `setAdsEnabled(boolean)`: Enable/Disable ads dynamically at runtime.
+- `areAdsEnabled()`: Check current global ad status.
+- `updateConfig(SmartAdsConfig)`: Switch ad unit IDs or logic on the fly.
+- `preloadAds(Context)`: Manually trigger pre-fetching for all formats.
+- `isAnyAdShowing()`: Returns true if any full-screen ad is active.
+
+### Format Availability
+- `isAppOpenAdAvailable()`: Check if App Open is ready.
+- `isInterstitialAdAvailable()`: Check if Interstitial is loaded.
+- `isRewardedAdAvailable()`: Check if Rewarded is loaded.
+- `getAppOpenAdStatus()`: Returns `LOADED`, `LOADING`, `IDLE`, etc.
 
 ### UMP Consent
-- `isPrivacyOptionsRequired()`: Check if the privacy form is needed.
-- `showPrivacyOptionsForm(Activity)`: Display the UMP form.
+- `isPrivacyOptionsRequired()`: Check if GDPR/CCPA settings are needed.
+- `showPrivacyOptionsForm(Activity)`: Display the UMP settings form.
 
 ---
 
