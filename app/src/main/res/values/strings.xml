@@ -3,7 +3,7 @@
     <string name="admob_app_id">ca-app-pub-3940256099942544~3347511713</string>
 
     <!-- Headers -->
-    <string name="header_implementation">SmartAds Implementation</string>
+
     <string name="status_sdk_init">SDK Initialized • Test Mode</string>
     <string name="header_banner">Banner Ad</string>
     <string name="header_interstitial">Interstitial Ad</string>
@@ -29,8 +29,8 @@
     <string name="btn_privacy">Privacy Options</string>
     <string name="btn_shutdown">Shutdown SDK</string>
     <string name="btn_clear_logs">Clear Logs</string>
-    <string name="btn_toggle_ads">Toggle Ads</string>
-    <string name="btn_verify_mediation">Verify Mediation</string>
+
+
 
     <!-- Native Size -->
     <string name="size_small">Small</string>
@@ -38,6 +38,15 @@
     <string name="size_large">Large</string>
 
     <!-- Log Initial -->
-    <string name="log_initial">> App started...\n</string>
+    <string name="log_initial">> App started…\n</string>
 
+
+    <!-- Extracted -->
+    <string name="ad_label_text">Ad</string>
+    <string name="install_now_text">Install Now</string>
+    <string name="sdk_shutdown_message">SDK Shutdown • Restart App to use ads</string>
+    <string name="sdk_not_initialized">SDK Not Initialized</string>
+    <string name="sdk_status_format">SDK v%1$s • %2$s</string>
+    <string name="mode_test">Test Mode</string>
+    <string name="mode_prod">Prod Mode</string>
 </resources>

@@ -1,4 +1,4 @@
-package com.example.app;
+package com.partharoypc.smartads.demo;
 
 import android.os.Bundle;
 import android.text.format.DateFormat;
@@ -243,13 +243,13 @@ public class MainActivity extends AppCompatActivity {
         btnPrivacyOptions.setEnabled(false);
         btnShutdownSdk.setEnabled(false);
 
-        textSdkStatus.setText("SDK Shutdown • Restart App to use ads");
+        textSdkStatus.setText(R.string.sdk_shutdown_message);
         textSdkStatus.setTextColor(ContextCompat.getColor(this, R.color.red_error));
     }
 
     private void updateSdkStatus() {
         if (!SmartAds.isInitialized()) {
-            textSdkStatus.setText("SDK Not Initialized");
+            textSdkStatus.setText(R.string.sdk_not_initialized);
             textSdkStatus.setTextColor(ContextCompat.getColor(this, R.color.red_error));
             return;
         }
@@ -258,7 +258,8 @@ public class MainActivity extends AppCompatActivity {
         boolean areAdsEnabled = config.isAdsEnabled();
         String version = SmartAds.getVersion();
 
-        textSdkStatus.setText("SDK v" + version + " • " + (isTestMode ? "Test Mode" : "Prod Mode"));
+        String mode = isTestMode ? getString(R.string.mode_test) : getString(R.string.mode_prod);
+        textSdkStatus.setText(getString(R.string.sdk_status_format, version, mode));
 
         if (!areAdsEnabled) {
             textSdkStatus.append("\n⛔ Ads Disabled");
@@ -361,6 +362,12 @@ public class MainActivity extends AppCompatActivity {
     // ================= BANNER =================
     private void loadBanner(boolean collapsible) {
         log("Loading Banner (Collapsible: " + collapsible + ")...");
+
+        // Update config to enable/disable collapsible banner for this request
+        com.partharoypc.smartads.SmartAdsConfig current = SmartAds.getInstance().getConfig();
+        SmartAds.getInstance().updateConfig(current.toBuilder()
+                .setCollapsibleBannerEnabled(collapsible)
+                .build());
 
         // Ensure container is visible
         bannerContainer.setVisibility(View.VISIBLE);

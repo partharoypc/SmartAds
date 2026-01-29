@@ -3,11 +3,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.app"
+    namespace = "com.partharoypc.smartads.demo"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.example.app"
+        applicationId = "com.partharoypc.smartads.demo"
         minSdk = 23
         targetSdk = 36
         versionCode = 1
@@ -35,12 +35,13 @@ dependencies {
 
     implementation("androidx.appcompat:appcompat:1.7.1")
     implementation("com.google.android.material:material:1.13.0")
-    implementation("androidx.activity:activity:1.12.2")
+    implementation("androidx.activity:activity:1.12.3")
     implementation("androidx.constraintlayout:constraintlayout:2.2.1")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.3.0")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.7.0")
     implementation(project(":smartads"))
+    implementation("com.google.android.gms:play-services-ads:24.9.0")
 
 
 }

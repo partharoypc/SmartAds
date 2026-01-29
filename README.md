@@ -59,9 +59,15 @@ dependencies {
 
 ### Manifest (`AndroidManifest.xml`)
 ```xml
+<!-- Ad And Internet Permission -->
+<uses-permission android:name="android.permission.INTERNET"/>
+<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+<uses-permission android:name="com.google.android.gms.permission.AD_ID"/>
+
+<!-- Admob Meta Data (inside the application tag) -->
 <meta-data
-    android:name="com.google.android.gms.ads.APPLICATION_ID"
-    android:value="ca-app-pub-xxxxxxxxxxxxxxxx~yyyyyyyyyy"/>
+  android:name="com.google.android.gms.ads.APPLICATION_ID"
+      android:value="ca-app-pub-xxxxxxxxxxxxxxxx~yyyyyyyyyy"/>
 ```
 
 ---
