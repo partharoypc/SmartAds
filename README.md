@@ -52,7 +52,7 @@ dependencyResolutionManagement {
 ### App Level (`build.gradle`)
 ```gradle
 dependencies {
-    implementation 'com.github.partharoypc:SmartAds:5.0.0'
+    implementation 'com.github.partharoypc:SmartAds:5.2.0'
     implementation 'com.google.android.gms:play-services-ads:24.0.0'
 }
 ```
