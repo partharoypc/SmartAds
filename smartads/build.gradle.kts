@@ -46,20 +46,13 @@ android {
 }
 
 dependencies {
-    // Core Dependencies
     implementation("com.google.android.gms:play-services-ads:24.9.0")
     implementation("androidx.lifecycle:lifecycle-runtime:2.10.0")
     implementation("androidx.lifecycle:lifecycle-process:2.10.0")
     implementation("androidx.annotation:annotation:1.9.1")
     implementation("com.google.android.material:material:1.13.0")
-
-    // Mediation Adapters
-    implementation("com.google.ads.mediation:facebook:6.21.0.0")
-    implementation("com.google.ads.mediation:applovin:13.5.1.0")
-    implementation("com.google.ads.mediation:unity:4.16.5.0")
-    
-    // Tools
-    implementation("com.google.android.ads:mediation-test-suite:3.0.0")
+    // Optional: Mediation Test Suite
+    compileOnly("com.google.android.ads:mediation-test-suite:3.0.0")
 }
 
 // ✅ Important: wrap publishing block inside afterEvaluate
@@ -70,7 +63,7 @@ afterEvaluate {
                 from(components["release"])
                 groupId = "com.github.partharoypc"
                 artifactId = "SmartAds"
-                version = "5.2.0"
+                version = "5.3.0"
 
                 pom {
                     name.set("SmartAds")

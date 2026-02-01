@@ -52,8 +52,11 @@ dependencyResolutionManagement {
 ### App Level (`build.gradle`)
 ```gradle
 dependencies {
-    implementation 'com.github.partharoypc:SmartAds:5.2.0'
-    implementation 'com.google.android.gms:play-services-ads:24.0.0'
+    implementation 'com.github.partharoypc:SmartAds:5.3.0'
+    implementation 'com.google.android.gms:play-services-ads:24.9.0'
+
+    // Note: Mediation adapters are NOT included by default.
+    // Only add the networks you actually use (see Mediation Setup section below)
 }
 ```
 
@@ -217,69 +220,214 @@ SmartAds.getInstance().setAnalyticsListener((adUnitId, adFormat, adNetwork, valu
 
 ---
 
-## 🤝 6. Complete Mediation Adapters Setup Guide
-Maximize your revenue by integrating top-tier ad networks. SmartAds makes it easy to verify and manage these integrations.
+## 🤝 6. Mediation Setup (Optional)
 
-### **Quick Dependencies (build.gradle)**
-Add these to your app-level `build.gradle` file. Always check for the latest versions on the [Google Mediation Page](https://developers.google.com/admob/android/mediation).
+> [!IMPORTANT]
+> SmartAds library does **NOT** include any mediation adapters by default. Only add the networks you actually use in AdMob mediation to keep your app size minimal.
 
+### When to Add Mediation Adapters
+
+Add mediation dependencies to your **app's** `build.gradle` ONLY if:
+- ✅ You have configured that network in your AdMob account mediation settings
+- ✅ You want to use that network for ad fill
+- ❌ **Don't** add them "just in case" - each adapter adds 3-5 MB to your app size
+
+---
+
+### Available Mediation Networks
+
+Always check the [Google Mediation Page](https://developers.google.com/admob/android/mediation) for the latest adapter versions.
+
+#### 🔵 Meta (Facebook Audience Network)
+
+**Step 1**: Add dependency to your app's `build.gradle`
 ```gradle
 dependencies {
-    // 🔵 Meta (Facebook)
     implementation 'com.google.ads.mediation:facebook:6.21.0.0'
+}
+```
 
-    // 🔴 AppLovin MAX
+**Step 2**: Enable in SmartAds config
+```java
+SmartAdsConfig config = new SmartAdsConfig.Builder()
+    .setFacebookMediationEnabled(true)  // Enable verification
+    // ... other config
+    .build();
+```
+
+**Manifest**: No extra meta-data required.
+
+---
+
+#### 🔴 AppLovin MAX
+
+**Step 1**: Add dependency to your app's `build.gradle`
+```gradle
+dependencies {
     implementation 'com.google.ads.mediation:applovin:13.5.1.0'
+}
+```
 
-    // 🟢 Unity Ads
+**Step 2**: Add SDK key to `AndroidManifest.xml` (inside `<application>` tag)
+```xml
+<meta-data 
+    android:name="applovin.sdk.key" 
+    android:value="YOUR_APPLOVIN_SDK_KEY"/>
+```
+
+**Step 3**: Enable in SmartAds config
+```java
+SmartAdsConfig config = new SmartAdsConfig.Builder()
+    .setAppLovinMediationEnabled(true)  // Enable verification
+    // ... other config
+    .build();
+```
+
+---
+
+#### 🟢 Unity Ads
+
+**Step 1**: Add dependency to your app's `build.gradle`
+```gradle
+dependencies {
     implementation 'com.google.ads.mediation:unity:4.16.5.0'
 }
 ```
 
-### **Network-Specific Manifest Setup**
-| Network | Requirement | Implementation |
-|---------|-------------|----------------|
-| **AppLovin** | SDK Key | `<meta-data android:name="applovin.sdk.key" android:value="YOUR_KEY"/>` |
-| **Meta** | None | No extra manifest meta-data needed. |
-| **Unity Ads** | None | Configuration handled via AdMob UI. |
-| **All** | Hardware Accel | `android:hardwareAccelerated="true"` in `<application>` (Recommended). |
-
-### **Recommended ProGuard / R8 Rules**
-If you use `minifyEnabled true`, add these to your `proguard-rules.pro` to prevent ad crashes:
-
-```proguard
-# Google Mobile Ads
--keep public class com.google.android.gms.ads.** { *; }
-
-# Meta (Facebook)
--keep class com.facebook.ads.** { *; }
-
-# AppLovin
--keep class com.applovin.** { *; }
-
-# Unity Ads
--keep class com.unity3d.ads.** { *; }
--keep class com.unity3d.services.** { *; }
+**Step 2**: Enable in SmartAds config
+```java
+SmartAdsConfig config = new SmartAdsConfig.Builder()
+    .setUnityMediationEnabled(true)  // Enable verification
+    // ... other config
+    .build();
 ```
 
-### **Mediation Verification & Debugging**
-SmartAds provides built-in tools to ensure your mediation is working:
+**Manifest**: No extra meta-data required. Configuration is handled via AdMob UI.
 
-1. **Adapter Detection**:
-   ```java
-   // Logs "✅ Network Name Adapter found" or "❌ NOT found"
-   SmartAds.getInstance().verifyMediation(activity);
-   ```
-2. **AdMob Ad Inspector**:
-   ```java
-   // Gesture-based or manual trigger to see real-time fill status
-   SmartAds.getInstance().launchAdInspector(activity);
-   ```
-3. **Mediation Test Suite**:
-   ```java
-   // Launch the official test UI (requires dependency)
-   SmartAds.getInstance().openMediationTestSuite(activity);
-   ```
+---
+
+### Recommended ProGuard / R8 Rules
+
+If you use `minifyEnabled true`, add these rules to your app's `proguard-rules.pro` **only for the networks you're using**:
+
+```proguard
+# Google Mobile Ads (Always required)
+-keep public class com.google.android.gms.ads.** { *; }
+
+# Meta (Facebook) - Only if using Facebook mediation
+-keep class com.facebook.ads.** { *; }
+-dontwarn com.facebook.ads.**
+
+# AppLovin - Only if using AppLovin mediation
+-keep class com.applovin.** { *; }
+-dontwarn com.applovin.**
+
+# Unity Ads - Only if using Unity mediation
+-keep class com.unity3d.ads.** { *; }
+-keep class com.unity3d.services.** { *; }
+-dontwarn com.unity3d.ads.**
+-dontwarn com.unity3d.services.**
+```
+
+---
+
+### Mediation Verification & Debugging
+
+SmartAds provides built-in tools to ensure your mediation setup is working correctly:
+
+#### 1. Adapter Detection
+Automatically logs which adapters are found during initialization (when logging is enabled):
+```java
+SmartAdsConfig config = new SmartAdsConfig.Builder()
+    .setLoggingEnabled(true)  // Enable to see adapter detection logs
+    .setFacebookMediationEnabled(true)
+    .setAppLovinMediationEnabled(true)
+    .build();
+
+// Logs will show:
+// ✅ Facebook / Meta Audience Network Adapter found.
+// ✅ AppLovin Adapter found.
+// ❌ Unity Ads Adapter NOT found. Add dependency.
+```
+
+You can also manually verify at any time:
+```java
+SmartAds.getInstance().verifyMediation(activity);
+```
+
+#### 2. AdMob Ad Inspector
+Launch the official AdMob inspector to see real-time ad fill status and mediation waterfall:
+```java
+SmartAds.getInstance().launchAdInspector(activity);
+```
+
+#### 3. Mediation Test Suite (Optional)
+For comprehensive mediation testing, add the test suite to your app (debug builds only):
+```gradle
+dependencies {
+    debugImplementation 'com.google.android.ads:mediation-test-suite:3.0.0'
+}
+```
+
+Then launch it:
+```java
+SmartAds.getInstance().openMediationTestSuite(activity);
+```
+
+---
+
+### Example: Complete Setup with Selective Mediation
+
+**Scenario**: You only want to use Facebook and AppLovin mediation.
+
+**App's `build.gradle`**:
+```gradle
+dependencies {
+    implementation 'com.github.partharoypc:SmartAds:5.3.0'
+    
+    // Only the networks you use
+    implementation 'com.google.ads.mediation:facebook:6.21.0.0'
+    implementation 'com.google.ads.mediation:applovin:13.5.1.0'
+    
+    // Optional: Test suite for debugging
+    debugImplementation 'com.google.android.ads:mediation-test-suite:3.0.0'
+}
+```
+
+**AndroidManifest.xml**:
+```xml
+<application>
+    <!-- AdMob App ID (Required) -->
+    <meta-data
+        android:name="com.google.android.gms.ads.APPLICATION_ID"
+        android:value="ca-app-pub-xxxxxxxxxxxxxxxx~yyyyyyyyyy"/>
+    
+    <!-- AppLovin SDK Key (Required for AppLovin) -->
+    <meta-data 
+        android:name="applovin.sdk.key" 
+        android:value="YOUR_APPLOVIN_SDK_KEY"/>
+</application>
+```
+
+**Application class**:
+```java
+SmartAdsConfig config = new SmartAdsConfig.Builder()
+    .setAdsEnabled(true)
+    .setTestModeEnabled(BuildConfig.DEBUG)
+    .setLoggingEnabled(BuildConfig.DEBUG)
+    
+    // Enable only the networks you added
+    .setFacebookMediationEnabled(true)
+    .setAppLovinMediationEnabled(true)
+    .setUnityMediationEnabled(false)  // Not using Unity
+    
+    // Your ad unit IDs
+    .setAdMobBannerId("ca-app-pub-xxx/banner")
+    .setAdMobInterstitialId("ca-app-pub-xxx/interstitial")
+    .build();
+
+SmartAds.initialize(this, config);
+```
 
 ---
 
