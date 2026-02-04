@@ -20,6 +20,10 @@ import java.util.Random;
  */
 public class HouseAdLoader {
 
+    private HouseAdLoader() {
+        // Utility class
+    }
+
     /**
      * Selects a House Ad from the list based on a weighted random algorithm
      * favoring higher ratings.
@@ -83,14 +87,14 @@ public class HouseAdLoader {
         if (rootView == null || ad == null)
             return;
 
-        TextView headline = rootView.findViewById(R.id.ad_headline);
-        TextView body = rootView.findViewById(R.id.ad_body);
-        TextView cta = rootView.findViewById(R.id.ad_call_to_action);
-        ImageView icon = rootView.findViewById(R.id.ad_app_icon);
-        View mediaView = rootView.findViewById(R.id.ad_media);
-        View advertiser = rootView.findViewById(R.id.ad_advertiser);
+        TextView headline = rootView.findViewById(R.id.smartads_ad_headline);
+        TextView body = rootView.findViewById(R.id.smartads_ad_body);
+        TextView cta = rootView.findViewById(R.id.smartads_ad_call_to_action);
+        ImageView icon = rootView.findViewById(R.id.smartads_ad_app_icon);
+        View mediaView = rootView.findViewById(R.id.smartads_ad_media);
+        View advertiser = rootView.findViewById(R.id.smartads_ad_advertiser);
         // Add star rating support if present in layout
-        android.widget.RatingBar ratingBar = rootView.findViewById(R.id.ad_stars);
+        android.widget.RatingBar ratingBar = rootView.findViewById(R.id.smartads_ad_stars);
 
         if (headline != null) {
             headline.setText(ad.getTitle());
@@ -126,8 +130,6 @@ public class HouseAdLoader {
                     ((ImageView) mediaView).setImageResource(ad.getImageResId());
                     ((ImageView) mediaView).setScaleType(ImageView.ScaleType.CENTER_CROP);
                 } else if (mediaView instanceof android.view.ViewGroup) {
-                    // Critical Fix: Handle container views (Frame/Linear) properly
-                    // by removing old views and adding a fresh ImageView.
                     android.view.ViewGroup mediaGroup = (android.view.ViewGroup) mediaView;
                     mediaGroup.removeAllViews();
 

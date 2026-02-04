@@ -46,6 +46,17 @@ public class BannerAdManager {
             return;
         }
 
+        if (!com.partharoypc.smartads.utils.NetworkUtils.isNetworkAvailable(activity)) {
+            SmartAdsLogger.d("No Internet Connection. Skipping AdMob Banner.");
+            if (config.isHouseAdsEnabled()) {
+                loadHouseBanner(activity, adContainer, config, listener);
+            } else {
+                if (listener != null)
+                    listener.onAdFailed("No Internet Connection.");
+            }
+            return;
+        }
+
         String adUnitId = config.isTestMode() ? TestAdIds.ADMOB_BANNER_ID : config.getAdMobBannerId();
         if (adUnitId == null || adUnitId.isEmpty()) {
             if (config.isHouseAdsEnabled()) {
@@ -147,9 +158,9 @@ public class BannerAdManager {
         SmartAdsLogger.d("Showing House Banner Ad.");
 
         View houseBannerView = android.view.LayoutInflater.from(activity)
-                .inflate(R.layout.layout_house_banner, adContainer, false);
+                .inflate(R.layout.smartads_layout_house_banner, adContainer, false);
 
-        ImageView imageView = houseBannerView.findViewById(R.id.house_banner_image);
+        ImageView imageView = houseBannerView.findViewById(R.id.smartads_house_banner_image);
 
         if (houseAd.getImageResId() != 0) {
             imageView.setImageResource(houseAd.getImageResId());

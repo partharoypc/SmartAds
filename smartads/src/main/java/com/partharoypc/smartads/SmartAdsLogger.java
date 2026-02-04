@@ -5,6 +5,10 @@ import android.util.Log;
 public final class SmartAdsLogger {
     private static final String TAG = "SmartAds";
 
+    private SmartAdsLogger() {
+        // Utility class
+    }
+
     public static void d(String message) {
         try {
             if (SmartAds.getInstance().getConfig().isLoggingEnabled()) {

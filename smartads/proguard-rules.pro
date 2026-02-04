@@ -1,69 +1,49 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+# SmartAds Library public API
+-keep public class com.partharoypc.smartads.SmartAds {
+    public *;
+}
+-keep public class com.partharoypc.smartads.SmartAdsConfig {
+    public *;
+}
+-keep public class com.partharoypc.smartads.SmartAdsConfig$Builder {
+    public *;
+}
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# Keep Listeners (Public Interfaces)
+-keep public interface com.partharoypc.smartads.listeners.** { *; }
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+# Keep Enums/Data Classes (Public)
+-keep public class com.partharoypc.smartads.AdStatus { *; }
+-keep public class com.partharoypc.smartads.NativeAdSize { *; }
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# Keep House Ads (Data Models)
+-keep public class com.partharoypc.smartads.house.HouseAd { *; }
 
-# Google Mobile Ads
+# Internal Managers / UI (Allowed to be obfuscated internally, but keep class names if necessary for debugging - optional)
+# For now, we allow FULL obfuscation of managers/ui as they are not public API.
+
+# --- Dependency Rules (Library Build) ---
+
+# Google Mobile Ads (Required for library compilation)
 -keep class com.google.android.gms.ads.** { *; }
 -dontwarn com.google.android.gms.ads.**
 
-# Lifecycle
+# Lifecycle (Required for ProcessLifecycleOwner)
 -keep class androidx.lifecycle.** { *; }
 -dontwarn androidx.lifecycle.**
-
-# SmartAds Library public API
--keep public class com.partharoypc.smartads.* {
-    public protected *;
-}
--keep public class com.partharoypc.smartads.listeners.* {
-    public protected *;
-}
--keep public class com.partharoypc.smartads.managers.* {
-    public protected *;
-}
--keep public class com.partharoypc.smartads.ui.* {
-    public protected *;
-}
--keep public class com.partharoypc.smartads.AdStatus { *; }
--keep public class com.partharoypc.smartads.NativeAdSize { *; }
 
 # User Messaging Platform (UMP)
 -keep class com.google.android.ump.** { *; }
 -dontwarn com.google.android.ump.**
 
-# --- Mediation Adapters ---
-
-# Meta (Facebook)
--keep class com.facebook.ads.** { *; }
+# --- Mediation Adapters (Compile time safety) ---
 -dontwarn com.facebook.ads.**
-
-# AppLovin
--keep class com.applovin.** { *; }
 -dontwarn com.applovin.**
-
-# Unity Ads
--keep class com.unity3d.ads.** { *; }
--keep class com.unity3d.services.** { *; }
 -dontwarn com.unity3d.ads.**
+-dontwarn com.unity3d.services.**
 
 # --- Common attributes ---
 -keepattributes Signature
 -keepattributes *Annotation*
 -keepattributes EnclosingMethod,InnerClasses
+-keepattributes SourceFile,LineNumberTable

@@ -7,13 +7,12 @@
     app:cardBackgroundColor="@android:color/transparent">
 
     <ImageView
-        android:id="@+id/house_ad_image"
+        android:id="@+id/smartads_house_ad_image"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:contentDescription="Ad Content"
+        android:contentDescription="@string/smartads_desc_ad_content"
         android:scaleType="centerCrop"
-        android:src="@drawable/bg_ad_badge"
-        tools:ignore="HardcodedText" />
+        android:src="@drawable/smartads_bg_ad_badge" />
 
     <View
         android:layout_width="match_parent"
@@ -21,20 +20,19 @@
         android:background="#60000000" />
 
     <ImageButton
-        android:id="@+id/house_ad_close_btn"
+        android:id="@+id/smartads_house_ad_close_btn"
         android:layout_width="44dp"
         android:layout_height="44dp"
         android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"
         android:layout_margin="20dp"
-        android:background="@drawable/bg_close_button"
+        android:background="@drawable/smartads_bg_close_button"
         android:backgroundTint="#80000000"
-        android:contentDescription="Close Ad"
+        android:contentDescription="@string/smartads_desc_close_ad"
         android:padding="12dp"
         android:scaleType="centerInside"
         android:src="@android:drawable/ic_menu_close_clear_cancel"
-        app:tint="#FFFFFF"
-        tools:ignore="HardcodedText" />
+        app:tint="#FFFFFF" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -42,7 +40,7 @@
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
         android:layout_margin="20dp"
-        android:background="@drawable/rounded_status_bg"
+        android:background="@drawable/smartads_rounded_status_bg"
         android:backgroundTint="#FBBF24"
         android:paddingHorizontal="10dp"
         android:paddingVertical="4dp"
@@ -74,15 +72,14 @@
                 android:orientation="horizontal">
 
                 <com.google.android.material.imageview.ShapeableImageView
-                    android:id="@+id/house_ad_icon"
+                    android:id="@+id/smartads_house_ad_icon"
                     android:layout_width="64dp"
                     android:layout_height="64dp"
                     android:background="#F1F5F9"
-                    android:contentDescription="App Icon"
+                    android:contentDescription="@string/smartads_desc_app_icon"
                     android:padding="2dp"
                     android:scaleType="centerInside"
-                    app:shapeAppearanceOverlay="@style/ShapeAppearance.MaterialComponents.MediumComponent"
-                    tools:ignore="HardcodedText" />
+                    app:shapeAppearanceOverlay="@style/ShapeAppearance.MaterialComponents.MediumComponent" />
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -92,19 +89,18 @@
                     android:orientation="vertical">
 
                     <TextView
-                        android:id="@+id/house_ad_title"
+                        android:id="@+id/smartads_house_ad_title"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:ellipsize="end"
                         android:maxLines="1"
-                        android:text="App Title"
+                        android:text="@string/smartads_placeholder_title"
                         android:textColor="#0F172A"
                         android:textSize="20sp"
-                        android:textStyle="bold"
-                        tools:ignore="HardcodedText" />
+                        android:textStyle="bold" />
 
                     <RatingBar
-                        android:id="@+id/house_ad_rating"
+                        android:id="@+id/smartads_house_ad_rating"
                         style="?android:attr/ratingBarStyleSmall"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -116,23 +112,22 @@
                         android:theme="@style/Widget.AppCompat.RatingBar.Small" />
 
                     <TextView
-                        android:id="@+id/house_ad_desc"
+                        android:id="@+id/smartads_house_ad_desc"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="2dp"
                         android:ellipsize="end"
                         android:maxLines="2"
-                        android:text="Modern description goes here for this amazing application."
+                        android:text="@string/smartads_placeholder_desc"
                         android:textColor="#64748B"
-                        android:textSize="14sp"
-                        tools:ignore="HardcodedText" />
+                        android:textSize="14sp" />
 
                 </LinearLayout>
 
             </LinearLayout>
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/house_ad_cta"
+                android:id="@+id/smartads_house_ad_cta"
                 style="@style/Widget.MaterialComponents.Button"
                 android:layout_width="match_parent"
                 android:layout_height="52dp"
@@ -143,8 +138,8 @@
                 android:textAllCaps="true"
                 android:textSize="16sp"
                 android:textStyle="bold"
-                app:background="@color/ad_call_to_action_bg"
-                app:backgroundTint="@color/ad_call_to_action_bg"
+                app:background="@color/smartads_ad_call_to_action_bg"
+                app:backgroundTint="@color/smartads_ad_call_to_action_bg"
                 app:cornerRadius="10dp" />
 
         </LinearLayout>

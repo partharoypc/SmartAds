@@ -213,8 +213,8 @@ public class SmartAds {
     public void openMediationTestSuite(Context context) {
         try {
             MediationTestSuite.launch(context);
-        } catch (Exception e) {
-            SmartAdsLogger.e("Failed to launch Mediation Test Suite: " + e.getMessage());
+        } catch (Throwable e) {
+            SmartAdsLogger.e("Failed to launch Mediation Test Suite (Dependency missing?): " + e.getMessage());
         }
     }
 
@@ -222,8 +222,9 @@ public class SmartAds {
         try {
             Class.forName(className);
             SmartAdsLogger.d("✅ " + networkName + " Adapter found.");
-        } catch (ClassNotFoundException e) {
-            SmartAdsLogger.e("❌ " + networkName + " Adapter NOT found. Add dependency.");
+        } catch (Throwable e) {
+            SmartAdsLogger.e(
+                    "❌ " + networkName + " Adapter NOT found. Add dependency. (" + e.getClass().getSimpleName() + ")");
         }
     }
 

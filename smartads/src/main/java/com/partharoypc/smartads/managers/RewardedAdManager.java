@@ -43,6 +43,16 @@ public class RewardedAdManager extends BaseFullScreenAdManager {
     }
 
     private void loadAdMob(Context context, SmartAdsConfig config) {
+        if (!com.partharoypc.smartads.utils.NetworkUtils.isNetworkAvailable(context)) {
+            SmartAdsLogger.d("No Internet Connection. Skipping AdMob Rewarded.");
+            if (loadHouseAd(context, config)) {
+                SmartAdsLogger.d("Fallback to House Rewarded Ad (Offline).");
+            } else {
+                adStatus = AdStatus.IDLE;
+                isLoading = false;
+            }
+            return;
+        }
         String adUnitId = config.isTestMode() ? TestAdIds.ADMOB_REWARDED_ID : config.getAdMobRewardedId();
         if (adUnitId == null || adUnitId.isEmpty()) {
             if (config.isHouseAdsEnabled()) {

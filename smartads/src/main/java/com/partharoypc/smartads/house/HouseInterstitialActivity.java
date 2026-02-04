@@ -39,7 +39,7 @@ public class HouseInterstitialActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_house_interstitial);
+        setContentView(R.layout.smartads_activity_house_interstitial);
 
         int adIndex = getIntent().getIntExtra(EXTRA_AD_INDEX, -1);
         SmartAdsConfig config = SmartAds.getInstance().getConfig();
@@ -53,13 +53,13 @@ public class HouseInterstitialActivity extends Activity {
         HouseAd ad = ads.get(adIndex);
 
         // Views
-        ImageView mainImage = findViewById(R.id.house_ad_image);
-        ImageView iconImage = findViewById(R.id.house_ad_icon);
-        android.widget.TextView titleText = findViewById(R.id.house_ad_title);
-        android.widget.TextView descText = findViewById(R.id.house_ad_desc);
-        android.widget.RatingBar ratingBar = findViewById(R.id.house_ad_rating);
-        android.widget.Button ctaButton = findViewById(R.id.house_ad_cta);
-        ImageButton closeBtn = findViewById(R.id.house_ad_close_btn);
+        ImageView mainImage = findViewById(R.id.smartads_house_ad_image);
+        ImageView iconImage = findViewById(R.id.smartads_house_ad_icon);
+        android.widget.TextView titleText = findViewById(R.id.smartads_house_ad_title);
+        android.widget.TextView descText = findViewById(R.id.smartads_house_ad_desc);
+        android.widget.RatingBar ratingBar = findViewById(R.id.smartads_house_ad_rating);
+        android.widget.Button ctaButton = findViewById(R.id.smartads_house_ad_cta);
+        ImageButton closeBtn = findViewById(R.id.smartads_house_ad_close_btn);
 
         // Populate Data
         if (ad.getImageResId() != 0) {

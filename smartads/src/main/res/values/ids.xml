@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <item type="id" name="ad_app_icon" />
-    <item type="id" name="ad_headline" />
-    <item type="id" name="ad_advertiser" />
-    <item type="id" name="ad_stars" />
-    <item type="id" name="ad_body" />
-    <item type="id" name="ad_media" />
+    <item type="id" name="smartads_ad_app_icon" />
+    <item type="id" name="smartads_ad_headline" />
+    <item type="id" name="smartads_ad_advertiser" />
+    <item type="id" name="smartads_ad_stars" />
+    <item type="id" name="smartads_ad_body" />
+    <item type="id" name="smartads_ad_media" />
 
-    <item type="id" name="ad_call_to_action" />
-    <item type="id" name="ad_price" />
-    <item type="id" name="ad_store" />
-    <item type="id" name="ad_choices_container" />
+    <item type="id" name="smartads_ad_call_to_action" />
+    <item type="id" name="smartads_ad_price" />
+    <item type="id" name="smartads_ad_store" />
+    <item type="id" name="smartads_ad_choices_container" />
 </resources>

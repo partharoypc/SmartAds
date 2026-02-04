@@ -4,10 +4,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    app:cardBackgroundColor="@color/transparent"
+    app:cardBackgroundColor="@color/smartads_transparent"
     app:cardCornerRadius="8dp"
     app:cardElevation="2dp"
-    app:strokeColor="@color/ad_body"
+    app:strokeColor="@color/smartads_ad_body"
     app:strokeWidth="1dp">
 
     <FrameLayout
@@ -15,24 +15,23 @@
         android:layout_height="match_parent">
 
         <ImageView
-            android:id="@+id/house_banner_image"
+            android:id="@+id/smartads_house_banner_image"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:contentDescription="Ad Content"
-            android:scaleType="fitXY"
-            tools:ignore="HardcodedText" />
+            android:contentDescription="@string/smartads_desc_ad_content"
+            android:scaleType="fitXY" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="top|start"
             android:layout_margin="4dp"
-            android:background="@drawable/rounded_status_bg"
-            android:backgroundTint="@color/ad_badge_bg"
+            android:background="@drawable/smartads_rounded_status_bg"
+            android:backgroundTint="@color/smartads_ad_badge_bg"
             android:paddingHorizontal="6dp"
             android:paddingVertical="1dp"
             android:text="@string/smartads_label_ad"
-            android:textColor="@color/ad_badge_text"
+            android:textColor="@color/smartads_ad_badge_text"
             android:textSize="8sp"
             android:textStyle="bold"
             tools:ignore="SmallSp" />

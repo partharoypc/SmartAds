@@ -12,4 +12,13 @@
     <string name="smartads_fallback_cta">GET IT NOW</string>
     <string name="smartads_fallback_headline">Discover amazing apps</string>
     <string name="smartads_fallback_body">Try out this awesome application from our partner network.</string>
+    
+    <!-- Accessibility / Content Descriptions -->
+    <string name="smartads_desc_ad_content">Ad Content</string>
+    <string name="smartads_desc_close_ad">Close Ad</string>
+    <string name="smartads_desc_app_icon">App Icon</string>
+
+    <!-- House Ads Placeholders -->
+    <string name="smartads_placeholder_title">App Title</string>
+    <string name="smartads_placeholder_desc">Modern description goes here for this amazing application.</string>
 </resources>

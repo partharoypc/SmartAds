@@ -44,16 +44,16 @@ public class NativeAdManager {
         int layoutRes;
         switch (size) {
             case SMALL:
-                layoutRes = R.layout.native_ad_small;
+                layoutRes = R.layout.smartads_native_ad_small;
                 break;
             case MEDIUM:
-                layoutRes = R.layout.native_ad_medium;
+                layoutRes = R.layout.smartads_native_ad_medium;
                 break;
             case LARGE:
-                layoutRes = R.layout.native_ad_large;
+                layoutRes = R.layout.smartads_native_ad_large;
                 break;
             default:
-                layoutRes = R.layout.native_ad_medium;
+                layoutRes = R.layout.smartads_native_ad_medium;
                 break;
         }
         loadAdMob(activity, adContainer, layoutRes, config, listener);
@@ -64,6 +64,17 @@ public class NativeAdManager {
         if (activity == null || activity.isFinishing() || activity.isDestroyed()) {
             if (listener != null)
                 listener.onAdFailed("Activity is invalid.");
+            return;
+        }
+
+        if (!com.partharoypc.smartads.utils.NetworkUtils.isNetworkAvailable(activity)) {
+            SmartAdsLogger.d("No Internet Connection. Skipping AdMob Native.");
+            if (config.isHouseAdsEnabled()) {
+                loadHouseNative(activity, adContainer, layoutRes, config, listener);
+            } else {
+                if (listener != null)
+                    listener.onAdFailed("No Internet Connection.");
+            }
             return;
         }
 
@@ -178,13 +189,13 @@ public class NativeAdManager {
     }
 
     private void populateAdMobNativeAdView(NativeAd nativeAd, NativeAdView adView) {
-        adView.setMediaView(adView.findViewById(R.id.ad_media));
-        adView.setHeadlineView(adView.findViewById(R.id.ad_headline));
-        adView.setBodyView(adView.findViewById(R.id.ad_body));
-        adView.setCallToActionView(adView.findViewById(R.id.ad_call_to_action));
-        adView.setIconView(adView.findViewById(R.id.ad_app_icon));
-        adView.setStarRatingView(adView.findViewById(R.id.ad_stars));
-        adView.setAdvertiserView(adView.findViewById(R.id.ad_advertiser));
+        adView.setMediaView(adView.findViewById(R.id.smartads_ad_media));
+        adView.setHeadlineView(adView.findViewById(R.id.smartads_ad_headline));
+        adView.setBodyView(adView.findViewById(R.id.smartads_ad_body));
+        adView.setCallToActionView(adView.findViewById(R.id.smartads_ad_call_to_action));
+        adView.setIconView(adView.findViewById(R.id.smartads_ad_app_icon));
+        adView.setStarRatingView(adView.findViewById(R.id.smartads_ad_stars));
+        adView.setAdvertiserView(adView.findViewById(R.id.smartads_ad_advertiser));
 
         // Headline
         if (adView.getHeadlineView() != null) {

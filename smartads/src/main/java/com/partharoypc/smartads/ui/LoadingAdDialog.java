@@ -22,6 +22,7 @@ public class LoadingAdDialog {
     public LoadingAdDialog(Context context) {
         this.context = context;
     }
+
     private String headline;
     private String subHeadline;
     private Integer backgroundColor;
@@ -76,12 +77,12 @@ public class LoadingAdDialog {
         }
 
         @SuppressLint("InflateParams")
-        View view = LayoutInflater.from(activity).inflate(R.layout.dialog_loading_ad, null);
+        View view = LayoutInflater.from(activity).inflate(R.layout.smartads_dialog_loading_ad, null);
 
-        View cardView = view.findViewById(R.id.dialog_card);
-        View progressBar = view.findViewById(R.id.loading_progress);
-        TextView titleView = view.findViewById(R.id.loading_message);
-        TextView subtitleView = view.findViewById(R.id.loading_submessage);
+        View cardView = view.findViewById(R.id.smartads_dialog_card);
+        View progressBar = view.findViewById(R.id.smartads_loading_progress);
+        TextView titleView = view.findViewById(R.id.smartads_loading_message);
+        TextView subtitleView = view.findViewById(R.id.smartads_loading_submessage);
 
         String finalHeadline = (message != null) ? message : this.headline;
         if (finalHeadline != null)
