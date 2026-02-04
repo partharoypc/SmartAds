@@ -32,7 +32,9 @@ Integrating ads can be messy—handling context, memory leaks, pre-fetching, and
 - 📜 **Privacy First**: Built-in Google UMP (GDPR/CCPA) consent management.
 - 🧪 **Test Mode**: Automatically handles AdMob Test IDs during development.
 - 🔍 **Debug Suite**: Integrated Ad Inspector, Mediation Test Suite, and detailed logging.
-- 💰 **Paid Event Tracking**: Simple hook for revenue analytics (Firebase, AppsFlyer, etc.).
+- � **Offline Smart-Check**: Automatically skips network calls when offline and switches to House Ads immediately.
+- 🧹 **Optimized ProGuard**: Smart rules save users ~30MB by stripping unused AdMob code.
+- �💰 **Paid Event Tracking**: Simple hook for revenue analytics (Firebase, AppsFlyer, etc.).
 
 ---
 
@@ -52,11 +54,11 @@ dependencyResolutionManagement {
 ### App Level (`build.gradle`)
 ```gradle
 dependencies {
-    implementation 'com.github.partharoypc:SmartAds:5.3.0'
+    implementation 'com.github.partharoypc:SmartAds:5.4.0'
     implementation 'com.google.android.gms:play-services-ads:24.9.0'
 
+    // SmartAds automatically handles other internal dependencies.
     // Note: Mediation adapters are NOT included by default.
-    // Only add the networks you actually use (see Mediation Setup section below)
 }
 ```
 
@@ -383,7 +385,7 @@ SmartAds.getInstance().openMediationTestSuite(activity);
 **App's `build.gradle`**:
 ```gradle
 dependencies {
-    implementation 'com.github.partharoypc:SmartAds:5.3.0'
+    implementation 'com.github.partharoypc:SmartAds:5.4.0'
     
     // Only the networks you use
     implementation 'com.google.ads.mediation:facebook:6.21.0.0'
