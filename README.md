@@ -385,7 +385,7 @@ SmartAds.getInstance().openMediationTestSuite(activity);
 **App's `build.gradle`**:
 ```gradle
 dependencies {
-    implementation 'com.github.partharoypc:SmartAds:5.4.0'
+    implementation 'com.github.partharoypc:SmartAds:5.5.0'
     
     // Only the networks you use
     implementation 'com.google.ads.mediation:facebook:6.21.0.0'
