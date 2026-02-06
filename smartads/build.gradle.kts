@@ -63,7 +63,7 @@ afterEvaluate {
                 from(components["release"])
                 groupId = "com.github.partharoypc"
                 artifactId = "SmartAds"
-                version = "5.4.0"
+                version = "5.5.0"
 
                 pom {
                     name.set("SmartAds")
