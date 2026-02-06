@@ -2,10 +2,19 @@
 
 All notable changes to the **SmartAds** library will be documented in this file.
 
-## [5.0.0] - 2026-01-29
+## [5.5.0] - 2026-02-06
 
 ### Added
-- **Revenue Tracking (ILRD)**: Re-introduced `onAdRevenuePaid` callbacks with a simplified `SmartAdsAnalyticsListener` for precision ROI tracking.
+- **Loading Dialog Customization**: Added methods in `SmartAdsConfig` to customize the loading dialog's text, background color, text color, and progress bar color at runtime.
+- **Theme Support**: Introduced `Theme.SmartAds.Fullscreen` to ensure proper rendering of Material Components in internal activities.
+
+### Fixed
+- **House Interstitial Crash**: Resolved `InflateException` in `HouseInterstitialActivity` by migrating to `AppCompatActivity` and applying the correct Material theme.
+- **UI Contrast**: Improved `LoadingAdDialog` default background color (now White) for better text readability.
+- **Connectivity Checks**: Enhanced `NetworkUtils` to reliably detect internet connection across different Android API levels.
+
+### Changed
+- Refined `SmartAdsConfig` builder pattern for better chaining of UI customization options.
 - **House Ads System**: Built-in support for internal cross-promotion with weighted random selection and rich UI (Icon, Media, Rating, CTA).
 - **Comprehensive Mediation Verification**: Added `verifyMediation()` tool to detect Meta, AppLovin, and Unity adapters at runtime.
 - **Adaptive & Collapsible Banners**: Native support for building modern, high-conversion banner layouts.
