@@ -13,7 +13,9 @@ import com.partharoypc.smartads.SmartAdsConfig;
 
 import java.util.List;
 
-public class HouseInterstitialActivity extends Activity {
+import androidx.appcompat.app.AppCompatActivity;
+
+public class HouseInterstitialActivity extends AppCompatActivity {
 
     public static final String EXTRA_AD_INDEX = "extra_ad_index";
     public static HouseInterstitialListener listener;
@@ -39,6 +41,7 @@ public class HouseInterstitialActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
         setContentView(R.layout.smartads_activity_house_interstitial);
 
         int adIndex = getIntent().getIntExtra(EXTRA_AD_INDEX, -1);
@@ -94,6 +97,7 @@ public class HouseInterstitialActivity extends Activity {
             if (listener != null)
                 listener.onAdDismissed();
             finish();
+            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
         });
 
         if (listener != null)
@@ -106,6 +110,7 @@ public class HouseInterstitialActivity extends Activity {
         super.onBackPressed();
         if (listener != null)
             listener.onAdDismissed();
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
     }
 
     @Override

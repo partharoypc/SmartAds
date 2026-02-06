@@ -48,6 +48,16 @@ public class MyApplication extends Application {
                                                 .setRating(5.0f)
                                                 .setClickUrl("https://github.com/partharoypc")
                                                 .build())
+                                .addHouseAd(new com.partharoypc.smartads.house.HouseAd.Builder()
+                                                .setId("demo_house_ad_3")
+                                                .setTitle("Another Cool App")
+                                                .setDescription("This is a third house ad to test rotation.")
+                                                .setCtaText("Try Free")
+                                                .setIconResId(android.R.drawable.ic_menu_camera)
+                                                .setImageResId(android.R.drawable.ic_menu_gallery)
+                                                .setRating(4.5f)
+                                                .setClickUrl("https://google.com")
+                                                .build())
                                 .setHouseAdsEnabled(true)
                                 .build();
 

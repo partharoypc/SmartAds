@@ -65,13 +65,17 @@ public class HouseAdLoader {
      */
     public static void handleClick(Context context, HouseAd ad) {
         if (ad == null || ad.getClickUrl() == null || ad.getClickUrl().isEmpty()) {
+            com.partharoypc.smartads.SmartAdsLogger.e("House Ad click failed: Ad or URL is null.");
             return;
         }
         try {
             Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(ad.getClickUrl()));
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            if (!(context instanceof android.app.Activity)) {
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            }
             context.startActivity(intent);
         } catch (Exception e) {
+            com.partharoypc.smartads.SmartAdsLogger.e("Could not open House Ad link: " + e.getMessage());
             Toast.makeText(context, "Could not open link", Toast.LENGTH_SHORT).show();
         }
     }

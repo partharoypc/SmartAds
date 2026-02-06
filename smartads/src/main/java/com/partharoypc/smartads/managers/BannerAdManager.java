@@ -46,6 +46,7 @@ public class BannerAdManager {
             return;
         }
 
+        // 1. Check Internet
         if (!com.partharoypc.smartads.utils.NetworkUtils.isNetworkAvailable(activity)) {
             SmartAdsLogger.d("No Internet Connection. Skipping AdMob Banner.");
             if (config.isHouseAdsEnabled()) {
@@ -57,6 +58,7 @@ public class BannerAdManager {
             return;
         }
 
+        // 2. Check Ad Unit ID
         String adUnitId = config.isTestMode() ? TestAdIds.ADMOB_BANNER_ID : config.getAdMobBannerId();
         if (adUnitId == null || adUnitId.isEmpty()) {
             if (config.isHouseAdsEnabled()) {

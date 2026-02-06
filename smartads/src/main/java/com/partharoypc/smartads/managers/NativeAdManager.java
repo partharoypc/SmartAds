@@ -67,6 +67,7 @@ public class NativeAdManager {
             return;
         }
 
+        // 1. Check Internet
         if (!com.partharoypc.smartads.utils.NetworkUtils.isNetworkAvailable(activity)) {
             SmartAdsLogger.d("No Internet Connection. Skipping AdMob Native.");
             if (config.isHouseAdsEnabled()) {
@@ -78,6 +79,7 @@ public class NativeAdManager {
             return;
         }
 
+        // 2. Check Ad Unit ID
         String adUnitId = config.isTestMode() ? TestAdIds.ADMOB_NATIVE_ID : config.getAdMobNativeId();
         if (adUnitId == null || adUnitId.isEmpty()) {
             if (config.isHouseAdsEnabled()) {

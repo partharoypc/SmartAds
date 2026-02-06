@@ -22,6 +22,7 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.partharoypc.smartads.NativeAdSize;
 import com.partharoypc.smartads.SmartAds;
+import com.partharoypc.smartads.SmartAdsConfig;
 import com.partharoypc.smartads.listeners.BannerAdListener;
 import com.partharoypc.smartads.listeners.InterstitialAdListener;
 import com.partharoypc.smartads.listeners.NativeAdListener;
@@ -34,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
     // UI Components
     private TextView textSdkStatus;
     private com.google.android.material.switchmaterial.SwitchMaterial switchEnableAds;
+    private com.google.android.material.switchmaterial.SwitchMaterial switchForceHouseAds;
     private com.google.android.material.switchmaterial.SwitchMaterial switchMediationFacebook;
     private com.google.android.material.switchmaterial.SwitchMaterial switchMediationAppLovin;
     private com.google.android.material.switchmaterial.SwitchMaterial switchMediationUnity;
@@ -61,7 +63,9 @@ public class MainActivity extends AppCompatActivity {
     private FrameLayout nativeContainer;
 
     // Debug Utilities
-    private Button btnAdInspector, btnPrivacyOptions, btnShutdownSdk, btnPreviewLoadingDialog;
+    private Button btnAdInspector, btnPrivacyOptions, btnShutdownSdk, btnPreviewLoadingDialog, btnPreloadAds;
+    private com.google.android.material.textfield.TextInputEditText inputLoadingText;
+    private Button btnColorPurple, btnColorOrange;
 
     // Logger
     private TextView textLogger;
@@ -98,6 +102,7 @@ public class MainActivity extends AppCompatActivity {
         // Implementation Header
         textSdkStatus = findViewById(R.id.text_sdk_status);
         switchEnableAds = findViewById(R.id.switch_enable_ads);
+        switchForceHouseAds = findViewById(R.id.switch_force_house_ads);
         switchMediationFacebook = findViewById(R.id.switch_mediation_facebook);
         switchMediationAppLovin = findViewById(R.id.switch_mediation_applovin);
         switchMediationUnity = findViewById(R.id.switch_mediation_unity);
@@ -132,6 +137,10 @@ public class MainActivity extends AppCompatActivity {
         btnPrivacyOptions = findViewById(R.id.btn_privacy_options);
         btnShutdownSdk = findViewById(R.id.btn_shutdown_sdk);
         btnPreviewLoadingDialog = findViewById(R.id.btn_preview_loading_dialog);
+        btnPreloadAds = findViewById(R.id.btn_preload_ads);
+        inputLoadingText = findViewById(R.id.input_loading_text);
+        btnColorPurple = findViewById(R.id.btn_color_purple);
+        btnColorOrange = findViewById(R.id.btn_color_orange);
 
         // Logs
         textLogger = findViewById(R.id.text_logger);
@@ -144,6 +153,10 @@ public class MainActivity extends AppCompatActivity {
 
         switchEnableAds.setOnCheckedChangeListener((buttonView, isChecked) -> {
             toggleAds(isChecked);
+        });
+
+        switchForceHouseAds.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            toggleHouseAds(isChecked);
         });
 
         switchMediationFacebook.setOnCheckedChangeListener((buttonView, isChecked) -> {
@@ -229,16 +242,50 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        btnColorPurple.setOnClickListener(v -> {
+            log("🎨 Setting Dialog Color to Purple Theme");
+            SmartAds.getInstance().updateConfig(SmartAds.getInstance().getConfig().toBuilder()
+                    .setLoadingDialogColor(0xFF581C87, 0xFFFAF5FF) // bg: purple-900, text: purple-50
+                    .setLoadingDialogProgressColor(0xFFA855F7) // purple-500
+                    .build());
+            showSnackbar("Dialog Color: Purple");
+        });
+
+        btnColorOrange.setOnClickListener(v -> {
+            log("🎨 Setting Dialog Color to Orange Theme");
+            SmartAds.getInstance().updateConfig(SmartAds.getInstance().getConfig().toBuilder()
+                    .setLoadingDialogColor(0xFF7C2D12, 0xFFFFF7ED) // bg: orange-900, text: orange-50
+                    .setLoadingDialogProgressColor(0xFFF97316) // orange-500
+                    .build());
+            showSnackbar("Dialog Color: Orange");
+        });
+
         btnPreviewLoadingDialog.setOnClickListener(v -> {
+            String customText = inputLoadingText.getText().toString().trim();
+            if (!customText.isEmpty()) {
+                SmartAds.getInstance().updateConfig(SmartAds.getInstance().getConfig().toBuilder()
+                        .setLoadingDialogText(customText)
+                        .build());
+            }
+
             log("Previewing Loading Dialog for 3 seconds...");
             com.partharoypc.smartads.ui.LoadingAdDialog dialog = new com.partharoypc.smartads.ui.LoadingAdDialog(this);
-            dialog.show("Loading Ad...", null, null);
+            dialog.setSubHeadline(SmartAds.getInstance().getConfig().getDialogSubText());
+            dialog.show(SmartAds.getInstance().getConfig().getDialogText(),
+                    SmartAds.getInstance().getConfig().getDialogBackgroundColor(),
+                    SmartAds.getInstance().getConfig().getDialogTextColor());
 
             // Dismiss after 3 seconds
             new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
                 dialog.dismiss();
                 log("Loading Dialog Dismissed (Preview ended)");
             }, 3000);
+        });
+
+        btnPreloadAds.setOnClickListener(v -> {
+            log("🚀 Preloading ALL Ads...");
+            SmartAds.getInstance().preloadAds(this);
+            showSnackbar("Started Preloading Ads");
         });
     }
 
@@ -296,6 +343,40 @@ public class MainActivity extends AppCompatActivity {
 
         if (switchMediationUnity.isChecked() != config.isUnityMediationEnabled())
             switchMediationUnity.setChecked(config.isUnityMediationEnabled());
+
+        // We can check if we are in "Force House Ads" mode by checking if IDs are
+        // "invalid_id"
+        // But for simplicity, we just trust the UI state or keep it unchecked by
+        // default on invalid restart
+    }
+
+    private void toggleHouseAds(boolean forceHouseAds) {
+        if (!SmartAds.isInitialized())
+            return;
+
+        SmartAdsConfig current = SmartAds.getInstance().getConfig();
+        SmartAdsConfig.Builder builder = current.toBuilder();
+
+        if (forceHouseAds) {
+            log("🔧 Forcing House Ads (Switching to Invalid AdMob IDs)...");
+            builder.setAdMobBannerId("invalid_id")
+                    .setAdMobInterstitialId("invalid_id")
+                    .setAdMobRewardedId("invalid_id")
+                    .setAdMobNativeId("invalid_id")
+                    .setAdMobAppOpenId("invalid_id")
+                    .setHouseAdsEnabled(true); // Ensure house ads are ON
+        } else {
+            log("✅ Restoring AdMob Test IDs...");
+            // Restore Test IDs (as seen in MyApplication)
+            builder.setAdMobBannerId("ca-app-pub-3940256099942544/6300978111")
+                    .setAdMobInterstitialId("ca-app-pub-3940256099942544/1033173712")
+                    .setAdMobRewardedId("ca-app-pub-3940256099942544/5224354917")
+                    .setAdMobNativeId("ca-app-pub-3940256099942544/2247696110")
+                    .setAdMobAppOpenId("ca-app-pub-3940256099942544/9257395921");
+        }
+
+        SmartAds.getInstance().updateConfig(builder.build());
+        showSnackbar("Force House Ads: " + (forceHouseAds ? "ON" : "OFF"));
     }
 
     private void toggleAds(boolean enabled) {

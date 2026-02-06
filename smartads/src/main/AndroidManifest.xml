@@ -11,7 +11,7 @@
     <application>
         <activity
             android:name=".house.HouseInterstitialActivity"
-            android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
+            android:theme="@style/Theme.SmartAds.Fullscreen"
             android:configChanges="orientation|screenSize|keyboardHidden"/>
     </application>
 </manifest>

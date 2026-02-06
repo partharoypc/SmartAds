@@ -80,4 +80,30 @@ public abstract class BaseFullScreenAdManager {
         isLoading = false;
         dismissLoadingDialog();
     }
+
+    /**
+     * Checks if network is available. If not, attempts to load a House Ad.
+     * 
+     * @param context       Context reference
+     * @param config        SmartAdsConfig reference
+     * @param houseAdLoader Functional interface to trigger House Ad loading
+     * @return true if we should stop execution (either because no net & house ad
+     *         loading started, or no net & no house ad available).
+     */
+    protected boolean checkNetworkAndFallback(Context context, SmartAdsConfig config, Runnable houseAdLoader) {
+        if (!com.partharoypc.smartads.utils.NetworkUtils.isNetworkAvailable(context)) {
+            SmartAdsLogger.d("No Internet Connection. Checking for House Ad fallback...");
+            if (config.isHouseAdsEnabled()) {
+                houseAdLoader.run();
+                return true; // We delegated to house ad loader
+            } else {
+                SmartAdsLogger.d("No Internet and House Ads disabled. Ad Request failed.");
+                adStatus = AdStatus.IDLE;
+                isLoading = false;
+                dismissLoadingDialog();
+                return true; // Stop execution
+            }
+        }
+        return false; // Network checks out, proceed with AdMob
+    }
 }

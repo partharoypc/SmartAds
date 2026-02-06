@@ -112,8 +112,8 @@ public class AppOpenAdManager extends BaseFullScreenAdManager
                 scheduleRetry(application, null, AppOpenAdManager.this::fetchAd);
             }
         };
-        if (!com.partharoypc.smartads.utils.NetworkUtils.isNetworkAvailable(application)) {
-            SmartAdsLogger.d("No Internet Connection. Skipping AdMob App Open.");
+
+        if (checkNetworkAndFallback(application, SmartAds.getInstance().getConfig(), () -> {
             if (SmartAds.getInstance().getConfig().isHouseAdsEnabled()) {
                 List<HouseAd> houseAds = SmartAds.getInstance().getConfig().getHouseAds();
                 selectedHouseAd = HouseAdLoader.selectAd(houseAds);
@@ -121,11 +121,15 @@ public class AppOpenAdManager extends BaseFullScreenAdManager
                     selectedHouseAdIndex = houseAds.indexOf(selectedHouseAd);
                     isHouseAdReady = true;
                     onAdLoadedBase();
-                    return;
+                } else {
+                    isLoading = false;
+                    adStatus = AdStatus.FAILED;
                 }
+            } else {
+                isLoading = false;
+                adStatus = AdStatus.FAILED;
             }
-            isLoading = false;
-            adStatus = AdStatus.FAILED;
+        })) {
             return;
         }
 

@@ -25,9 +25,11 @@ public class NetworkUtils {
             if (network == null)
                 return false;
             NetworkCapabilities capabilities = connectivityManager.getNetworkCapabilities(network);
-            return capabilities != null && (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
-                    capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
-                    capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET));
+            return capabilities != null &&
+                    (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
+                            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
+                            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) ||
+                            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_VPN));
         } else {
             android.net.NetworkInfo activeNetwork = connectivityManager.getActiveNetworkInfo();
             return activeNetwork != null && activeNetwork.isConnected();

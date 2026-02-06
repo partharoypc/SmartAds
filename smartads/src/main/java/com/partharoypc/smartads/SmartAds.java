@@ -110,6 +110,16 @@ public class SmartAds {
         if (instance == null) {
             synchronized (SmartAds.class) {
                 if (instance == null) {
+                    if (application == null || config == null) {
+                        SmartAdsLogger.e("SmartAds Initialize failed: Application or Config is null.");
+                        return;
+                    }
+
+                    if (androidx.core.content.ContextCompat.checkSelfPermission(application,
+                            Manifest.permission.INTERNET) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                        SmartAdsLogger.e("⚠️ INTERNET permission is missing! SmartAds requires it to function.");
+                    }
+
                     instance = new SmartAds();
                     instance.application = application;
                     instance.config = config;
@@ -147,9 +157,19 @@ public class SmartAds {
                     if (config.isLoggingEnabled()) {
                         instance.verifyMediation(application);
                     }
+                    SmartAdsLogger.d("SmartAds Initialized (v" + getVersion() + ")");
                 }
             }
         }
+    }
+
+    /**
+     * Checks if the device currently has an active internet connection.
+     * Delegates to
+     * {@link com.partharoypc.smartads.utils.NetworkUtils#isNetworkAvailable(Context)}.
+     */
+    public static boolean isNetworkAvailable(Context context) {
+        return com.partharoypc.smartads.utils.NetworkUtils.isNetworkAvailable(context);
     }
 
     /**

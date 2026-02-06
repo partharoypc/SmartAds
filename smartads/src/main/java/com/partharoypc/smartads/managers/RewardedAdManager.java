@@ -43,14 +43,15 @@ public class RewardedAdManager extends BaseFullScreenAdManager {
     }
 
     private void loadAdMob(Context context, SmartAdsConfig config) {
-        if (!com.partharoypc.smartads.utils.NetworkUtils.isNetworkAvailable(context)) {
-            SmartAdsLogger.d("No Internet Connection. Skipping AdMob Rewarded.");
+        if (checkNetworkAndFallback(context, config, () -> {
             if (loadHouseAd(context, config)) {
                 SmartAdsLogger.d("Fallback to House Rewarded Ad (Offline).");
             } else {
                 adStatus = AdStatus.IDLE;
                 isLoading = false;
+                dismissLoadingDialog();
             }
+        })) {
             return;
         }
         String adUnitId = config.isTestMode() ? TestAdIds.ADMOB_REWARDED_ID : config.getAdMobRewardedId();
@@ -140,10 +141,23 @@ public class RewardedAdManager extends BaseFullScreenAdManager {
         if (adStatus != AdStatus.LOADED) {
             // Not loaded and not loading -> Start loading and wait
             com.partharoypc.smartads.SmartAdsLogger.d("Rewarded Ad not loaded. Starting load...");
+            SmartAdsConfig config = com.partharoypc.smartads.SmartAds.getInstance().getConfig();
+
+            // Check if we can load anything (Network OR House Ads)
+            boolean isNetworkAvailable = com.partharoypc.smartads.utils.NetworkUtils.isNetworkAvailable(activity);
+            boolean hasHouseAds = config.isHouseAdsEnabled() && !config.getHouseAds().isEmpty();
+
+            if (!isNetworkAvailable && !hasHouseAds) {
+                com.partharoypc.smartads.SmartAdsLogger.d("No Internet and No House Ads. Cannot show ad.");
+                if (listener != null) {
+                    listener.onAdFailedToShow("No Internet connection and no offline ads available.");
+                }
+                return;
+            }
+
             isShowPending = true;
             pendingActivity = activity;
             showLoadingDialog(activity);
-            SmartAdsConfig config = com.partharoypc.smartads.SmartAds.getInstance().getConfig();
             loadAd(activity, config);
             return;
         }

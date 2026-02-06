@@ -67,6 +67,19 @@
                         app:trackTint="#80FFFFFF"
                         tools:ignore="HardcodedText" />
 
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                        android:id="@+id/switch_force_house_ads"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:checked="false"
+                        android:text="Force House Ads (Test Mode)"
+                        android:textColor="#FFFFFF"
+                        android:textSize="14sp"
+                        app:thumbTint="@color/white"
+                        app:trackTint="#80FFFFFF"
+                        tools:ignore="HardcodedText" />
+
                     <!-- Mediation Header -->
                     <TextView
                         android:layout_width="wrap_content"
@@ -675,6 +688,17 @@
                         </LinearLayout>
 
                         <Button
+                            android:id="@+id/btn_preload_ads"
+                            style="@style/Widget.MaterialComponents.Button.TextButton"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:text="Preload All Ads"
+                            android:textColor="@color/colorSecondary"
+                            app:icon="@android:drawable/ic_popup_sync"
+                            app:iconTint="@color/colorSecondary" />
+
+                        <Button
                             android:id="@+id/btn_preview_loading_dialog"
                             style="@style/Widget.MaterialComponents.Button.TextButton"
                             android:layout_width="match_parent"
@@ -695,6 +719,61 @@
                             android:textColor="#EF4444"
                             app:icon="@android:drawable/ic_menu_close_clear_cancel"
                             app:iconTint="#EF4444" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="16dp"
+                            android:text="Loading Dialog Settings"
+                            android:textColor="@color/white"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:hint="Dialog Text"
+                            app:boxBackgroundColor="@color/surface_card"
+                            app:boxStrokeColor="@color/colorPrimary"
+                            app:hintTextColor="@color/colorPrimary">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/input_loading_text"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="Loading Ad..."
+                                android:textColor="@color/green_success" />
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:orientation="horizontal">
+
+                            <Button
+                                android:id="@+id/btn_color_purple"
+                                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginEnd="4dp"
+                                android:layout_weight="1"
+                                android:text="Purple"
+                                android:textColor="#A855F7"
+                                app:strokeColor="#A855F7" />
+
+                            <Button
+                                android:id="@+id/btn_color_orange"
+                                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="4dp"
+                                android:layout_weight="1"
+                                android:text="Orange"
+                                android:textColor="#F97316"
+                                app:strokeColor="#F97316" />
+                        </LinearLayout>
                     </LinearLayout>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
