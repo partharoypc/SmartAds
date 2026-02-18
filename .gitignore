@@ -61,3 +61,10 @@ google-services.json
 # System-specific
 .DS_Store
 Thumbs.db
+
+caches
+daemon
+native
+wrapper
+android
+.idea
