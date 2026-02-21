@@ -101,7 +101,7 @@ public class SmartAds {
      * Returns the current version of the library.
      */
     public static String getVersion() {
-        return "5.0.0";
+        return "5.6.0";
     }
 
     @RequiresPermission(Manifest.permission.INTERNET)

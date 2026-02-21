@@ -54,7 +54,7 @@ dependencyResolutionManagement {
 ### App Level (`build.gradle`)
 ```gradle
 dependencies {
-    implementation 'com.github.partharoypc:SmartAds:5.4.0'
+    implementation 'com.github.partharoypc:SmartAds:5.6.0'
     implementation 'com.google.android.gms:play-services-ads:24.9.0'
 
     // SmartAds automatically handles other internal dependencies.
@@ -234,12 +234,12 @@ SmartAds.getInstance().launchAdInspector(activity);
 ### Example: Complete Setup
 
 
-**Scenario**: You only want to use Facebook and AppLovin mediation.
+**Scenario**: You want to set up Google AdMob with Banner and Interstitial Ads.
 
 **App's `build.gradle`**:
 ```gradle
 dependencies {
-    implementation 'com.github.partharoypc:SmartAds:5.5.0'
+    implementation 'com.github.partharoypc:SmartAds:5.6.0'
 }
 ```
 
@@ -276,7 +276,7 @@ SmartAds.initialize(this, config);
 - `initialize(Application, SmartAdsConfig)`: Setup the SDK (Call once).
 - `getInstance()`: Access the singleton instance.
 - `isInitialized()`: Static check for initialization status.
-- `getVersion()`: Returns "5.0.0".
+- `getVersion()`: Returns "5.6.0".
 - `shutdown()`: Fully stop all ad services and clear memory.
 
 ### Ad Control & Status
