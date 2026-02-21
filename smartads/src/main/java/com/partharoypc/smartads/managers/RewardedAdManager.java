@@ -63,6 +63,19 @@ public class RewardedAdManager extends BaseFullScreenAdManager {
             return;
         }
 
+        // 3. AdMob NO_FILL Rate Limiting
+        if (com.partharoypc.smartads.utils.AdMobRateLimiter.isRateLimited(adUnitId)) {
+            SmartAdsLogger.d("AdMob Rate Limiter active (NO_FILL Cooldown). Skipping AdMob Rewarded Request.");
+            if (config.isHouseAdsEnabled()) {
+                loadHouseAd(context, config);
+            } else {
+                adStatus = AdStatus.IDLE;
+                isLoading = false;
+                dismissLoadingDialog();
+            }
+            return;
+        }
+
         AdRequest adRequest = new AdRequest.Builder().build();
         RewardedAd.load(context, adUnitId, adRequest, new RewardedAdLoadCallback() {
             @Override
@@ -79,6 +92,9 @@ public class RewardedAdManager extends BaseFullScreenAdManager {
             @Override
             public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
                 SmartAdsLogger.e("❌ Rewarded Ad Failed to Load: " + loadAdError.getMessage());
+                if (loadAdError.getCode() == com.google.android.gms.ads.AdRequest.ERROR_CODE_NO_FILL) {
+                    com.partharoypc.smartads.utils.AdMobRateLimiter.recordNoFill(adUnitId);
+                }
                 // Fallback to House Ad
                 if (loadHouseAd(context, config)) {
                     SmartAdsLogger.d("Fallback to House Rewarded Ad.");

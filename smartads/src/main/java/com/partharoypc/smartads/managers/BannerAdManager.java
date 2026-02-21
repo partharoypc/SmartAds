@@ -68,6 +68,18 @@ public class BannerAdManager {
             return;
         }
 
+        // 3. AdMob NO_FILL Rate Limiting
+        if (com.partharoypc.smartads.utils.AdMobRateLimiter.isRateLimited(adUnitId)) {
+            SmartAdsLogger.d("AdMob Rate Limiter active (NO_FILL Cooldown). Skipping AdMob Banner Request.");
+            if (config.isHouseAdsEnabled()) {
+                loadHouseBanner(activity, adContainer, config, listener);
+            } else {
+                if (listener != null)
+                    listener.onAdFailed("Rate Limited (NO_FILL Cooldown)");
+            }
+            return;
+        }
+
         // Clean up existing ads before loading new one
         destroy(adContainer);
 
@@ -117,6 +129,9 @@ public class BannerAdManager {
 
             public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
                 SmartAdsLogger.e("❌ Banner Ad Failed to Load: " + loadAdError.getMessage());
+                if (loadAdError.getCode() == com.google.android.gms.ads.AdRequest.ERROR_CODE_NO_FILL) {
+                    com.partharoypc.smartads.utils.AdMobRateLimiter.recordNoFill(adUnitId);
+                }
                 // FALLBACK TO HOUSE AD
                 if (config.isHouseAdsEnabled()) {
                     loadHouseBanner(activity, adContainer, config, listener);

@@ -89,6 +89,18 @@ public class NativeAdManager {
             return;
         }
 
+        // 3. AdMob NO_FILL Rate Limiting
+        if (com.partharoypc.smartads.utils.AdMobRateLimiter.isRateLimited(adUnitId)) {
+            SmartAdsLogger.d("AdMob Rate Limiter active (NO_FILL Cooldown). Skipping AdMob Native Request.");
+            if (config.isHouseAdsEnabled()) {
+                loadHouseNative(activity, adContainer, layoutRes, config, listener);
+            } else {
+                if (listener != null)
+                    listener.onAdFailed("Rate Limited (NO_FILL Cooldown)");
+            }
+            return;
+        }
+
         SmartAdsLogger.d("Loading Native Ad...");
 
         AdLoader.Builder builder = new AdLoader.Builder(activity, adUnitId);
@@ -124,6 +136,9 @@ public class NativeAdManager {
             @Override
             public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
                 com.partharoypc.smartads.SmartAdsLogger.e("❌ Native Ad Failed to Load: " + loadAdError.getMessage());
+                if (loadAdError.getCode() == com.google.android.gms.ads.AdRequest.ERROR_CODE_NO_FILL) {
+                    com.partharoypc.smartads.utils.AdMobRateLimiter.recordNoFill(adUnitId);
+                }
                 // FALLBACK TO HOUSE NATIVE
                 if (config.isHouseAdsEnabled()) {
                     loadHouseNative(activity, adContainer, layoutRes, config, listener);
