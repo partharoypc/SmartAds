@@ -51,8 +51,6 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-process:2.10.0")
     implementation("androidx.annotation:annotation:1.9.1")
     implementation("com.google.android.material:material:1.13.0")
-    // Optional: Mediation Test Suite
-    compileOnly("com.google.android.ads:mediation-test-suite:3.0.0")
 }
 
 // ✅ Important: wrap publishing block inside afterEvaluate

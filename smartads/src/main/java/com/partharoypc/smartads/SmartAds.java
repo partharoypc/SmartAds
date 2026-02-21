@@ -9,7 +9,6 @@ import android.widget.FrameLayout;
 import androidx.annotation.LayoutRes;
 import androidx.annotation.RequiresPermission;
 
-import com.google.android.ads.mediationtestsuite.MediationTestSuite;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.RequestConfiguration;
 import com.google.android.ump.ConsentInformation;
@@ -153,10 +152,6 @@ public class SmartAds {
                         instance.initializeSdks(application);
                     }
 
-                    // CHECK: Mediation Configuration Safety Check
-                    if (config.isLoggingEnabled()) {
-                        instance.verifyMediation(application);
-                    }
                     SmartAdsLogger.d("SmartAds Initialized (v" + getVersion() + ")");
                 }
             }
@@ -195,7 +190,7 @@ public class SmartAds {
     }
 
     /**
-     * Launches the AdMob Mediation Debugger/Inspector.
+     * Launches the AdMob Ad Inspector.
      * Useful for verifying ad network integration.
      *
      * @param activity current activity context.
@@ -204,48 +199,6 @@ public class SmartAds {
         MobileAds.openAdInspector(activity, error -> {
             /* Ad inspector closed or error */
         });
-    }
-
-    /**
-     * Checks if configured mediation adapters are present in the classpath.
-     * Logs the result to the console.
-     */
-    public void verifyMediation(Context context) {
-        if (config == null || !config.isLoggingEnabled())
-            return;
-        SmartAdsLogger.d("--- SmartAds Mediation Verification ---");
-
-        if (config.isFacebookMediationEnabled()) {
-            checkAdapter("com.google.ads.mediation.facebook.FacebookAdapter", "Facebook / Meta Audience Network");
-        }
-        if (config.isAppLovinMediationEnabled()) {
-            checkAdapter("com.google.ads.mediation.applovin.ApplovinAdapter", "AppLovin");
-        }
-        if (config.isUnityMediationEnabled()) {
-            checkAdapter("com.google.ads.mediation.unity.UnityAdapter", "Unity Ads");
-        }
-        SmartAdsLogger.d("---------------------------------------");
-    }
-
-    /**
-     * Opens the Mediation Test Suite if the dependency is included.
-     */
-    public void openMediationTestSuite(Context context) {
-        try {
-            MediationTestSuite.launch(context);
-        } catch (Throwable e) {
-            SmartAdsLogger.e("Failed to launch Mediation Test Suite (Dependency missing?): " + e.getMessage());
-        }
-    }
-
-    private void checkAdapter(String className, String networkName) {
-        try {
-            Class.forName(className);
-            SmartAdsLogger.d("✅ " + networkName + " Adapter found.");
-        } catch (Throwable e) {
-            SmartAdsLogger.e(
-                    "❌ " + networkName + " Adapter NOT found. Add dependency. (" + e.getClass().getSimpleName() + ")");
-        }
     }
 
     /**
@@ -362,22 +315,7 @@ public class SmartAds {
             String adUnitId,
             String adFormat) {
         if (analyticsListener != null) {
-            String adapterClassName = "unknown";
-            if (responseInfo != null && responseInfo.getMediationAdapterClassName() != null) {
-                adapterClassName = responseInfo.getMediationAdapterClassName();
-            }
-
-            // Simplified Network Name Mapping
-            String networkName = adapterClassName;
-            if (adapterClassName.contains("Facebook") || adapterClassName.contains("Meta")) {
-                networkName = "Facebook Audience Network";
-            } else if (adapterClassName.contains("AppLovin")) {
-                networkName = "AppLovin";
-            } else if (adapterClassName.contains("Unity")) {
-                networkName = "Unity Ads";
-            } else if (adapterClassName.contains("Google")) {
-                networkName = "Google AdMob";
-            }
+            String networkName = "Google AdMob";
 
             analyticsListener.onAdRevenuePaid(
                     adUnitId,

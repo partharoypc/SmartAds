@@ -15,7 +15,7 @@ public interface SmartAdsAnalyticsListener {
      * @param adFormat     The format of the ad (Banner, Interstitial, Reward,
      *                     etc.).
      * @param adNetwork    The name of the ad network that showed the ad (e.g.,
-     *                     "Google AdMob", "Facebook", "AppLovin").
+     *                     "Google AdMob").
      * @param valueMicros  The value of the ad in micros (millionths of a currency
      *                     unit).
      * @param currencyCode The ISO 4217 currency code (e.g., "USD").

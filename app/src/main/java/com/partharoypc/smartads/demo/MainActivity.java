@@ -36,10 +36,6 @@ public class MainActivity extends AppCompatActivity {
     private TextView textSdkStatus;
     private com.google.android.material.switchmaterial.SwitchMaterial switchEnableAds;
     private com.google.android.material.switchmaterial.SwitchMaterial switchForceHouseAds;
-    private com.google.android.material.switchmaterial.SwitchMaterial switchMediationFacebook;
-    private com.google.android.material.switchmaterial.SwitchMaterial switchMediationAppLovin;
-    private com.google.android.material.switchmaterial.SwitchMaterial switchMediationUnity;
-    private Button btnVerifyMediation;
 
     // Banner
     private FrameLayout bannerContainer;
@@ -95,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
                     log("💰 Paid: " + revenue + " " + currencyCode + " [" + adNetwork + "] (" + adFormat + ")");
                 });
 
-        log("App Started. Ready to test ads. Mediation toggles active.");
+        log("App Started. Ready to test ads.");
     }
 
     private void initViews() {
@@ -103,10 +99,6 @@ public class MainActivity extends AppCompatActivity {
         textSdkStatus = findViewById(R.id.text_sdk_status);
         switchEnableAds = findViewById(R.id.switch_enable_ads);
         switchForceHouseAds = findViewById(R.id.switch_force_house_ads);
-        switchMediationFacebook = findViewById(R.id.switch_mediation_facebook);
-        switchMediationAppLovin = findViewById(R.id.switch_mediation_applovin);
-        switchMediationUnity = findViewById(R.id.switch_mediation_unity);
-        btnVerifyMediation = findViewById(R.id.btn_verify_mediation);
 
         // Banner
         bannerContainer = findViewById(R.id.banner_container);
@@ -159,27 +151,6 @@ public class MainActivity extends AppCompatActivity {
             toggleHouseAds(isChecked);
         });
 
-        switchMediationFacebook.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            updateMediationConfig(isChecked, switchMediationAppLovin.isChecked(), switchMediationUnity.isChecked());
-        });
-
-        switchMediationAppLovin.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            updateMediationConfig(switchMediationFacebook.isChecked(), isChecked, switchMediationUnity.isChecked());
-        });
-
-        switchMediationUnity.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            updateMediationConfig(switchMediationFacebook.isChecked(), switchMediationAppLovin.isChecked(), isChecked);
-        });
-
-        btnVerifyMediation.setOnClickListener(v -> {
-            log("Verifying Mediation Adapters based on CURRENT switches...");
-            SmartAds.getInstance().verifyMediation(this);
-        });
-
-        findViewById(R.id.btn_test_suite).setOnClickListener(v -> {
-            SmartAds.getInstance().openMediationTestSuite(this);
-        });
-
         // Banner
         btnLoadBanner.setOnClickListener(v -> loadBanner(false));
         btnLoadCollapsible.setOnClickListener(v -> loadBanner(true));
@@ -208,13 +179,6 @@ public class MainActivity extends AppCompatActivity {
         btnAdInspector.setOnClickListener(v -> {
             log("Opening Ad Inspector...");
             SmartAds.getInstance().launchAdInspector(this);
-        });
-
-        // Mediation Verification Shortcut (Long Click)
-        btnAdInspector.setOnLongClickListener(v -> {
-            log("Verifying Mediation Adapters...");
-            SmartAds.getInstance().verifyMediation(this);
-            return true;
         });
 
         btnPrivacyOptions.setOnClickListener(v -> {
@@ -298,7 +262,7 @@ public class MainActivity extends AppCompatActivity {
         btnShowRewarded.setEnabled(false);
         btnShowAppOpen.setEnabled(false);
         btnLoadNative.setEnabled(false);
-        btnVerifyMediation.setEnabled(false);
+
         btnAdInspector.setEnabled(false);
         btnPrivacyOptions.setEnabled(false);
         btnPrivacyOptions.setEnabled(false);
@@ -334,15 +298,6 @@ public class MainActivity extends AppCompatActivity {
         if (switchEnableAds.isChecked() != areAdsEnabled) {
             switchEnableAds.setChecked(areAdsEnabled);
         }
-
-        if (switchMediationFacebook.isChecked() != config.isFacebookMediationEnabled())
-            switchMediationFacebook.setChecked(config.isFacebookMediationEnabled());
-
-        if (switchMediationAppLovin.isChecked() != config.isAppLovinMediationEnabled())
-            switchMediationAppLovin.setChecked(config.isAppLovinMediationEnabled());
-
-        if (switchMediationUnity.isChecked() != config.isUnityMediationEnabled())
-            switchMediationUnity.setChecked(config.isUnityMediationEnabled());
 
         // We can check if we are in "Force House Ads" mode by checking if IDs are
         // "invalid_id"
@@ -383,21 +338,6 @@ public class MainActivity extends AppCompatActivity {
         SmartAds.getInstance().setAdsEnabled(enabled);
         updateSdkStatus();
         showSnackbar("Ads " + (enabled ? "Enabled" : "Disabled"));
-    }
-
-    private void updateMediationConfig(boolean fb, boolean applovin, boolean unity) {
-        if (!SmartAds.isInitialized())
-            return;
-        // Create new config based on current one
-        com.partharoypc.smartads.SmartAdsConfig current = SmartAds.getInstance().getConfig();
-        com.partharoypc.smartads.SmartAdsConfig newConfig = current.toBuilder()
-                .setFacebookMediationEnabled(fb)
-                .setAppLovinMediationEnabled(applovin)
-                .setUnityMediationEnabled(unity)
-                .build();
-
-        SmartAds.getInstance().updateConfig(newConfig);
-        log("Updated Mediation Config: FB=" + fb + ", AL=" + applovin + ", Unity=" + unity);
     }
 
     @Override

@@ -23,10 +23,7 @@ public class MyApplication extends Application {
                                 .setFrequencyCapSeconds(15)
                                 .setLoadingDialogText("Loading awesome ad...")
                                 .setLoadingDialogColor(android.graphics.Color.DKGRAY, android.graphics.Color.YELLOW)
-                                // Mediation
-                                .setFacebookMediationEnabled(true)
-                                .setAppLovinMediationEnabled(true)
-                                .setUnityMediationEnabled(true)
+
                                 // House Ads
                                 .addHouseAd(new com.partharoypc.smartads.house.HouseAd.Builder()
                                                 .setId("demo_house_ad_1")

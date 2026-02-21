@@ -36,11 +36,7 @@
 -keep class com.google.android.ump.** { *; }
 -dontwarn com.google.android.ump.**
 
-# --- Mediation Adapters (Compile time safety) ---
--dontwarn com.facebook.ads.**
--dontwarn com.applovin.**
--dontwarn com.unity3d.ads.**
--dontwarn com.unity3d.services.**
+
 
 # --- Common attributes ---
 -keepattributes Signature

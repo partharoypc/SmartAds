@@ -22,11 +22,6 @@ public class SmartAdsConfig {
     private final boolean useUmpConsent;
     private final boolean houseAdsEnabled;
 
-    // Mediation Flags
-    private final boolean facebookMediationEnabled;
-    private final boolean appLovinMediationEnabled;
-    private final boolean unityMediationEnabled;
-
     // Targeting & Limits
     private final String maxAdContentRating;
     private final int tagForChildDirectedTreatment;
@@ -62,10 +57,6 @@ public class SmartAdsConfig {
         this.collapsibleBannerEnabled = builder.collapsibleBannerEnabled;
         this.useUmpConsent = builder.useUmpConsent;
         this.houseAdsEnabled = builder.houseAdsEnabled;
-
-        this.facebookMediationEnabled = builder.facebookMediationEnabled;
-        this.appLovinMediationEnabled = builder.applovinMediationEnabled;
-        this.unityMediationEnabled = builder.unityMediationEnabled;
 
         this.maxAdContentRating = builder.maxAdContentRating;
         this.tagForChildDirectedTreatment = builder.tagForChildDirectedTreatment;
@@ -129,18 +120,6 @@ public class SmartAdsConfig {
 
     public boolean isHouseAdsEnabled() {
         return houseAdsEnabled;
-    }
-
-    public boolean isFacebookMediationEnabled() {
-        return facebookMediationEnabled;
-    }
-
-    public boolean isAppLovinMediationEnabled() {
-        return appLovinMediationEnabled;
-    }
-
-    public boolean isUnityMediationEnabled() {
-        return unityMediationEnabled;
     }
 
     public String getMaxAdContentRating() {
@@ -240,11 +219,6 @@ public class SmartAdsConfig {
         private boolean useUmpConsent = false;
         private boolean houseAdsEnabled = false;
 
-        // Mediation Flags
-        private boolean facebookMediationEnabled = false;
-        private boolean applovinMediationEnabled = false;
-        private boolean unityMediationEnabled = false;
-
         // Targeting
         private String maxAdContentRating = RequestConfiguration.MAX_AD_CONTENT_RATING_G;
         private int tagForChildDirectedTreatment = RequestConfiguration.TAG_FOR_CHILD_DIRECTED_TREATMENT_UNSPECIFIED;
@@ -284,10 +258,6 @@ public class SmartAdsConfig {
             this.collapsibleBannerEnabled = config.collapsibleBannerEnabled;
             this.useUmpConsent = config.useUmpConsent;
             this.houseAdsEnabled = config.houseAdsEnabled;
-
-            this.facebookMediationEnabled = config.facebookMediationEnabled;
-            this.applovinMediationEnabled = config.appLovinMediationEnabled;
-            this.unityMediationEnabled = config.unityMediationEnabled;
 
             this.maxAdContentRating = config.maxAdContentRating;
             this.tagForChildDirectedTreatment = config.tagForChildDirectedTreatment;
@@ -379,23 +349,6 @@ public class SmartAdsConfig {
          */
         public Builder setUseUmpConsent(boolean useUmp) {
             this.useUmpConsent = useUmp;
-            return this;
-        }
-
-        // --- Mediation ---
-
-        public Builder setFacebookMediationEnabled(boolean enabled) {
-            this.facebookMediationEnabled = enabled;
-            return this;
-        }
-
-        public Builder setAppLovinMediationEnabled(boolean enabled) {
-            this.applovinMediationEnabled = enabled;
-            return this;
-        }
-
-        public Builder setUnityMediationEnabled(boolean enabled) {
-            this.unityMediationEnabled = enabled;
             return this;
         }
 
