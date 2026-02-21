@@ -61,11 +61,11 @@ afterEvaluate {
                 from(components["release"])
                 groupId = "com.github.partharoypc"
                 artifactId = "SmartAds"
-                version = "5.5.0"
+                version = "5.6.0"
 
                 pom {
                     name.set("SmartAds")
-                    description.set("Simple ad library for Android")
+                    description.set("Simple ad library for Android with House Ads")
                     url.set("https://github.com/partharoypc/SmartAds")
                 }
             }
