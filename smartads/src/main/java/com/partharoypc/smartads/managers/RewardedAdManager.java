@@ -92,7 +92,7 @@ public class RewardedAdManager extends BaseFullScreenAdManager {
                 isShowPending = false;
                 pendingActivity = null;
 
-                scheduleRetry(context, config, () -> loadAd(context, config));
+                scheduleRetry(context, config, loadAdError, () -> loadAd(context, config));
             }
         });
     }

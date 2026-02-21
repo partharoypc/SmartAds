@@ -62,9 +62,21 @@ public abstract class BaseFullScreenAdManager {
         });
     }
 
-    protected void scheduleRetry(Context context, SmartAdsConfig config, Runnable loadAction) {
-        long delay = (long) Math.min(60_000L, Math.pow(2, Math.max(0, retryAttempt)) * 1000L);
-        retryAttempt = Math.min(retryAttempt + 1, 10);
+    protected void scheduleRetry(Context context, SmartAdsConfig config,
+            com.google.android.gms.ads.LoadAdError loadAdError, Runnable loadAction) {
+        long delay;
+        // Protect Match Rate by throttling NO_FILL (Code 3)
+        if (loadAdError != null && loadAdError.getCode() == com.google.android.gms.ads.AdRequest.ERROR_CODE_NO_FILL) {
+            SmartAdsLogger.d("Throttling NO_FILL retry to protect Match Rate.");
+            delay = 60_000L; // Wait a full minute before trying again for new inventory
+            retryAttempt = 0; // Don't escalate no-fill counters
+        } else {
+            // Standard exponential backoff for network glips, capped tightly to prevent
+            // spam
+            delay = (long) Math.min(30_000L, Math.pow(2, Math.max(0, retryAttempt)) * 1000L);
+            retryAttempt = Math.min(retryAttempt + 1, 3); // Max 3 rapid backoffs
+        }
+
         handler.postDelayed(loadAction, delay);
     }
 

@@ -109,7 +109,7 @@ public class AppOpenAdManager extends BaseFullScreenAdManager
 
                 onAdFailedToLoadBase();
                 // Only retry if not house ad either
-                scheduleRetry(application, null, AppOpenAdManager.this::fetchAd);
+                scheduleRetry(application, null, loadAdError, AppOpenAdManager.this::fetchAd);
             }
         };
 
