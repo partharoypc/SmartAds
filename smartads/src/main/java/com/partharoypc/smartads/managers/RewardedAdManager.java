@@ -21,6 +21,9 @@ import com.partharoypc.smartads.listeners.RewardedAdListener;
 
 import java.util.List;
 
+/**
+ * Manages Rewarded Ads (users earn rewards for watching).
+ */
 public class RewardedAdManager extends BaseFullScreenAdManager {
     private RewardedAd admobRewardedAd;
     private RewardedAdListener developerListener;
@@ -29,7 +32,14 @@ public class RewardedAdManager extends BaseFullScreenAdManager {
     private HouseAd selectedHouseAd;
     private int selectedHouseAdIndex = -1;
 
+    /**
+     * Loads a Rewarded Ad.
+     */
     public void loadAd(Context context, SmartAdsConfig config) {
+        if (!SmartAds.getInstance().areAdsEnabled() || !config.isRewardedEnabled()) {
+            SmartAdsLogger.d("Rewarded Ad is disabled. Skipping request.");
+            return;
+        }
         if (adStatus == AdStatus.LOADING || adStatus == AdStatus.LOADED || isLoading) {
             return;
         }
@@ -137,6 +147,9 @@ public class RewardedAdManager extends BaseFullScreenAdManager {
         }
     }
 
+    /**
+     * Shows the Rewarded Ad and handles the reward callback.
+     */
     public void showAd(Activity activity, RewardedAdListener listener) {
         if (activity == null || activity.isFinishing() || activity.isDestroyed()) {
             if (listener != null)
@@ -151,6 +164,13 @@ public class RewardedAdManager extends BaseFullScreenAdManager {
             isShowPending = true;
             pendingActivity = activity;
             showLoadingDialog(activity);
+            return;
+        }
+
+        if (isFrequencyCapped(com.partharoypc.smartads.SmartAds.getInstance().getConfig())) {
+            com.partharoypc.smartads.SmartAdsLogger.d("Rewarded Ad Frequency Capped. Skipping.");
+            if (listener != null)
+                listener.onAdFailedToShow("Ad is frequency capped.");
             return;
         }
 
@@ -276,5 +296,13 @@ public class RewardedAdManager extends BaseFullScreenAdManager {
                             developerListener.onAdImpression();
                     }
                 });
+    }
+
+    @Override
+    protected void onLoadingTimeout() {
+        super.onLoadingTimeout();
+        if (developerListener != null) {
+            developerListener.onAdFailedToShow("Ad load timed out (5s).");
+        }
     }
 }

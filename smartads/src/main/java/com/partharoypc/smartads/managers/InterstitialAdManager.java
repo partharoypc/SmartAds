@@ -22,6 +22,9 @@ import com.partharoypc.smartads.listeners.InterstitialAdListener;
 
 import java.util.List;
 
+/**
+ * Manages Interstitial Ads (full-screen static/video ads).
+ */
 public class InterstitialAdManager extends BaseFullScreenAdManager {
     private InterstitialAd admobInterstitial;
     private InterstitialAdListener developerListener;
@@ -29,7 +32,14 @@ public class InterstitialAdManager extends BaseFullScreenAdManager {
     private HouseAd selectedHouseAd;
     private int selectedHouseAdIndex = -1;
 
+    /**
+     * Loads an Interstitial Ad.
+     */
     public void loadAd(Context context, SmartAdsConfig config) {
+        if (!SmartAds.getInstance().areAdsEnabled() || !config.isInterstitialEnabled()) {
+            SmartAdsLogger.d("Interstitial Ad is disabled. Skipping request.");
+            return;
+        }
         if (adStatus == AdStatus.LOADING || adStatus == AdStatus.LOADED || isLoading) {
             return;
         }
@@ -139,6 +149,9 @@ public class InterstitialAdManager extends BaseFullScreenAdManager {
         }
     }
 
+    /**
+     * Shows the Interstitial Ad if loaded.
+     */
     public void showAd(Activity activity, InterstitialAdListener listener) {
         if (activity == null || activity.isFinishing() || activity.isDestroyed()) {
             if (listener != null)
@@ -274,5 +287,13 @@ public class InterstitialAdManager extends BaseFullScreenAdManager {
                             developerListener.onAdImpression();
                     }
                 });
+    }
+
+    @Override
+    protected void onLoadingTimeout() {
+        super.onLoadingTimeout();
+        if (developerListener != null) {
+            developerListener.onAdFailedToShow("Ad load timed out (5s).");
+        }
     }
 }

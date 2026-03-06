@@ -24,6 +24,10 @@ import com.partharoypc.smartads.listeners.AppOpenAdListener;
 
 import java.util.List;
 
+/**
+ * Manages App Open Ads, including automatic lifecycle-based triggers and House
+ * Ad fallback.
+ */
 public class AppOpenAdManager extends BaseFullScreenAdManager
         implements DefaultLifecycleObserver, Application.ActivityLifecycleCallbacks {
     private final Application application;
@@ -41,6 +45,9 @@ public class AppOpenAdManager extends BaseFullScreenAdManager
         this.isAutoReloadEnabled = true;
     }
 
+    /**
+     * Sets the listener for App Open Ad events.
+     */
     public void setListener(AppOpenAdListener listener) {
         this.developerListener = listener;
     }
@@ -60,7 +67,15 @@ public class AppOpenAdManager extends BaseFullScreenAdManager
     private HouseAd selectedHouseAd;
     private int selectedHouseAdIndex = -1;
 
+    /**
+     * Fetches a new App Open Ad from AdMob or House Ads.
+     */
     public void fetchAd() {
+        if (!SmartAds.getInstance().areAdsEnabled() || !SmartAds.getInstance().getConfig().isAppOpenEnabled()) {
+            SmartAdsLogger.d("App Open Ad is disabled. Skipping request.");
+            return;
+        }
+
         if ((appOpenAd != null && isAdFresh()) || (isHouseAdReady && selectedHouseAd != null)) {
             SmartAdsLogger.d("App Open Ad is already fresh/ready. Skipping fetch.");
             return;
@@ -184,6 +199,11 @@ public class AppOpenAdManager extends BaseFullScreenAdManager
             return;
         }
 
+        if (isFrequencyCapped(SmartAds.getInstance().getConfig())) {
+            SmartAdsLogger.d("App Open Ad Frequency Capped. Skipping.");
+            return;
+        }
+
         // Prevent showing ad on top of House Ad Activity or if already showing
         if (isShowingAd || currentActivity instanceof HouseInterstitialActivity) {
             return;
@@ -217,6 +237,7 @@ public class AppOpenAdManager extends BaseFullScreenAdManager
                 SmartAdsLogger.d("App Open Ad Shown.");
                 isShowingAd = true;
                 adStatus = AdStatus.SHOWN;
+                lastShownTime = System.currentTimeMillis();
             }
 
             @Override
@@ -270,6 +291,7 @@ public class AppOpenAdManager extends BaseFullScreenAdManager
                     public void onAdImpression() {
                         adStatus = AdStatus.SHOWN;
                         isShowingAd = true;
+                        lastShownTime = System.currentTimeMillis();
                         if (developerListener != null)
                             developerListener.onAdImpression();
                     }

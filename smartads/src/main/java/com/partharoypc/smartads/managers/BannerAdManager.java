@@ -16,7 +16,6 @@ import com.partharoypc.smartads.SmartAds;
 import com.partharoypc.smartads.SmartAdsConfig;
 import com.partharoypc.smartads.TestAdIds;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.partharoypc.smartads.R;
@@ -28,9 +27,15 @@ import com.partharoypc.smartads.listeners.BannerAdListener;
 import java.util.Map;
 import java.util.WeakHashMap;
 
+/**
+ * Manages loading and displaying Banner Ads (AdMob and House Ads fallback).
+ */
 public class BannerAdManager {
     private final Map<FrameLayout, Boolean> listenerAdded = new WeakHashMap<>();
 
+    /**
+     * Loads and shows a banner ad in the provided container.
+     */
     @RequiresPermission(Manifest.permission.INTERNET)
     public void loadAndShowAd(Activity activity, FrameLayout adContainer, SmartAdsConfig config,
             BannerAdListener listener) {
@@ -40,6 +45,12 @@ public class BannerAdManager {
     @RequiresPermission(Manifest.permission.INTERNET)
     private void loadAdMob(Activity activity, FrameLayout adContainer, SmartAdsConfig config,
             BannerAdListener listener) {
+        if (!SmartAds.getInstance().areAdsEnabled() || !config.isBannerEnabled()) {
+            SmartAdsLogger.d("Banner Ad is disabled. Skipping request.");
+            if (listener != null)
+                listener.onAdFailed("Banner ads are disabled.");
+            return;
+        }
         if (activity == null || activity.isFinishing() || activity.isDestroyed()) {
             if (listener != null)
                 listener.onAdFailed("Activity is not valid.");

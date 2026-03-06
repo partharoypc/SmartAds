@@ -11,6 +11,10 @@ import com.partharoypc.smartads.SmartAdsConfig;
 import com.partharoypc.smartads.SmartAdsLogger;
 import com.partharoypc.smartads.ui.LoadingAdDialog;
 
+/**
+ * Base class for ad managers that handle full-screen ad formats (App Open,
+ * Interstitial, Rewarded).
+ */
 public abstract class BaseFullScreenAdManager {
     protected AdStatus adStatus = AdStatus.IDLE;
     protected LoadingAdDialog loadingDialog;
@@ -21,7 +25,8 @@ public abstract class BaseFullScreenAdManager {
     protected int retryAttempt = 0;
     protected static long lastShownTime = 0; // Static to cap across types if needed, or non-static for per-type
 
-    protected boolean isAutoReloadEnabled = true;
+    protected boolean isAutoReloadEnabled = false; // Default false to enforce strict impression rates
+    protected final Runnable loadingTimeoutRunnable = this::onLoadingTimeout;
 
     protected boolean isFrequencyCapped(SmartAdsConfig config) {
         long currentTime = System.currentTimeMillis();
@@ -45,10 +50,14 @@ public abstract class BaseFullScreenAdManager {
             Integer bgColor = config != null ? config.getDialogBackgroundColor() : null;
             Integer textColor = config != null ? config.getDialogTextColor() : null;
             loadingDialog.show(text, bgColor, textColor);
+
+            // AdMob Policy: Don't keep user waiting indefinitely. 5 seconds max.
+            handler.postDelayed(loadingTimeoutRunnable, 5000L);
         }
     }
 
     protected void dismissLoadingDialog() {
+        handler.removeCallbacks(loadingTimeoutRunnable);
         handler.post(() -> {
             if (loadingDialog != null) {
                 try {
@@ -60,6 +69,13 @@ public abstract class BaseFullScreenAdManager {
                 loadingDialog = null;
             }
         });
+    }
+
+    protected void onLoadingTimeout() {
+        SmartAdsLogger.e("Ad loading timed out. Dismissing dialog to prevent user block and unexpected ad displays.");
+        isShowPending = false;
+        pendingActivity = null;
+        dismissLoadingDialog();
     }
 
     protected void scheduleRetry(Context context, SmartAdsConfig config,

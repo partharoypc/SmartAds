@@ -86,6 +86,7 @@ public class HouseInterstitialActivity extends AppCompatActivity {
             HouseAdLoader.handleClick(this, ad);
             if (listener != null)
                 listener.onAdClicked();
+            finish();
         };
 
         mainImage.setOnClickListener(clickListener);

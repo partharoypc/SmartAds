@@ -5,7 +5,7 @@
     <string name="smartads_label_sponsored">Sponsored</string>
     
     <!-- Loading Dialog -->
-    <string name="smartads_loading_ad">Loading Ad...</string>
+    <string name="smartads_loading_ad">Loading Ad&#8230;</string>
     <string name="smartads_loading_optimizing">Optimizing your experience</string>
     
     <!-- Fallback / Placeholders -->

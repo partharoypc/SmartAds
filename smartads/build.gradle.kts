@@ -46,7 +46,7 @@ android {
 }
 
 dependencies {
-    implementation("com.google.android.gms:play-services-ads:24.9.0")
+    implementation("com.google.android.gms:play-services-ads:25.0.0")
     implementation("androidx.lifecycle:lifecycle-runtime:2.10.0")
     implementation("androidx.lifecycle:lifecycle-process:2.10.0")
     implementation("androidx.annotation:annotation:1.9.1")
@@ -61,7 +61,7 @@ afterEvaluate {
                 from(components["release"])
                 groupId = "com.github.partharoypc"
                 artifactId = "SmartAds"
-                version = "5.6.0"
+                version = "6.0.0"
 
                 pom {
                     name.set("SmartAds")

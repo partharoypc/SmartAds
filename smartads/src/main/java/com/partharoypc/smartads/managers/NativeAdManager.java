@@ -30,15 +30,25 @@ import com.partharoypc.smartads.listeners.NativeAdListener;
 import java.util.Map;
 import java.util.WeakHashMap;
 
+/**
+ * Manages loading and displaying Native Ads (AdMob and House Ads fallback).
+ */
 public class NativeAdManager {
     private final Map<FrameLayout, NativeAd> activeAds = new WeakHashMap<>();
     private final Map<FrameLayout, Boolean> listenerAdded = new WeakHashMap<>();
 
+    /**
+     * Loads and shows a Native Ad into a container using a custom layout.
+     */
     public void loadAndShowAd(Activity activity, FrameLayout adContainer, @LayoutRes int layoutRes,
             SmartAdsConfig config, NativeAdListener listener) {
         loadAdMob(activity, adContainer, layoutRes, config, listener);
     }
 
+    /**
+     * Loads and shows a Native Ad into a container using a predefined
+     * size/template.
+     */
     public void loadAndShowAd(Activity activity, FrameLayout adContainer, NativeAdSize size,
             SmartAdsConfig config, NativeAdListener listener) {
         int layoutRes;
@@ -61,6 +71,12 @@ public class NativeAdManager {
 
     private void loadAdMob(Activity activity, FrameLayout adContainer, @LayoutRes int layoutRes, SmartAdsConfig config,
             NativeAdListener listener) {
+        if (!SmartAds.getInstance().areAdsEnabled() || !config.isNativeEnabled()) {
+            SmartAdsLogger.d("Native Ad is disabled. Skipping request.");
+            if (listener != null)
+                listener.onAdFailed("Native ads are disabled.");
+            return;
+        }
         if (activity == null || activity.isFinishing() || activity.isDestroyed()) {
             if (listener != null)
                 listener.onAdFailed("Activity is invalid.");

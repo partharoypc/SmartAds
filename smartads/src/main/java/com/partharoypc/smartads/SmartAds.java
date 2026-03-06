@@ -4,9 +4,11 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
+import android.os.Bundle;
 import android.widget.FrameLayout;
 
 import androidx.annotation.LayoutRes;
+import androidx.annotation.NonNull;
 import androidx.annotation.RequiresPermission;
 
 import com.google.android.gms.ads.MobileAds;
@@ -48,17 +50,74 @@ public class SmartAds {
     private void requestUmpWithActivity(Application application) {
         if (appOpenAdManager == null)
             return;
-        ConsentRequestParameters params = new ConsentRequestParameters.Builder().build();
-        ConsentInformation consentInformation = UserMessagingPlatform.getConsentInformation(application);
+
+        Activity activity = appOpenAdManager.getCurrentActivityForUmp();
+        if (activity == null) {
+            SmartAdsLogger.d("No Activity available for UMP. Waiting for first Activity...");
+            application.registerActivityLifecycleCallbacks(new Application.ActivityLifecycleCallbacks() {
+                @Override
+                public void onActivityStarted(@NonNull Activity act) {
+                    if (!(act instanceof com.partharoypc.smartads.house.HouseInterstitialActivity)) {
+                        application.unregisterActivityLifecycleCallbacks(this);
+                        requestUmpWithActivity(application);
+                    }
+                }
+
+                @Override
+                public void onActivityCreated(@NonNull Activity a, Bundle b) {
+                }
+
+                @Override
+                public void onActivityResumed(@NonNull Activity a) {
+                }
+
+                @Override
+                public void onActivityPaused(@NonNull Activity a) {
+                }
+
+                @Override
+                public void onActivityStopped(@NonNull Activity a) {
+                }
+
+                @Override
+                public void onActivitySaveInstanceState(@NonNull Activity a, @NonNull Bundle b) {
+                }
+
+                @Override
+                public void onActivityDestroyed(@NonNull Activity a) {
+                }
+            });
+            return;
+        }
+
+        com.google.android.ump.ConsentDebugSettings.Builder debugSettingsBuilder = new com.google.android.ump.ConsentDebugSettings.Builder(
+                activity);
+        if (config
+                .getUmpDebugGeography() != com.google.android.ump.ConsentDebugSettings.DebugGeography.DEBUG_GEOGRAPHY_DISABLED) {
+            debugSettingsBuilder.setDebugGeography(config.getUmpDebugGeography());
+        }
+        if (config.getUmpTestDeviceHashedId() != null && !config.getUmpTestDeviceHashedId().isEmpty()) {
+            debugSettingsBuilder.addTestDeviceHashedId(config.getUmpTestDeviceHashedId());
+        }
+
+        com.google.android.ump.ConsentRequestParameters params = new com.google.android.ump.ConsentRequestParameters.Builder()
+                .setConsentDebugSettings(debugSettingsBuilder.build())
+                .build();
+
+        com.google.android.ump.ConsentInformation consentInformation = com.google.android.ump.UserMessagingPlatform
+                .getConsentInformation(application);
         consentInformation.requestConsentInfoUpdate(
-                appOpenAdManager.getCurrentActivityForUmp(),
+                activity,
                 params,
                 () -> {
-                    UserMessagingPlatform.loadAndShowConsentFormIfRequired(
-                            appOpenAdManager.getCurrentActivityForUmp(),
+                    com.google.android.ump.UserMessagingPlatform.loadAndShowConsentFormIfRequired(
+                            activity,
                             formError -> initializeSdks(application));
                 },
-                requestConsentError -> initializeSdks(application));
+                requestConsentError -> {
+                    SmartAdsLogger.e("UMP Consent Request Error: " + requestConsentError.getMessage());
+                    initializeSdks(application);
+                });
     }
 
     private void initializeManagersIfNeeded(Application application) {
@@ -219,13 +278,13 @@ public class SmartAds {
         if (!canShowAds())
             return;
 
-        if (appOpenAdManager != null && config.isAppOpenConfigured()) {
+        if (appOpenAdManager != null && config.isAppOpenConfigured() && config.isAppOpenEnabled()) {
             appOpenAdManager.fetchAd();
         }
-        if (interstitialAdManager != null && config.isInterstitialConfigured()) {
+        if (interstitialAdManager != null && config.isInterstitialConfigured() && config.isInterstitialEnabled()) {
             interstitialAdManager.loadAd(context, config);
         }
-        if (rewardedAdManager != null && config.isRewardedConfigured()) {
+        if (rewardedAdManager != null && config.isRewardedConfigured() && config.isRewardedEnabled()) {
             rewardedAdManager.loadAd(context, config);
         }
     }
@@ -233,11 +292,11 @@ public class SmartAds {
     private void initializeSdks(Application application) {
         MobileAds.initialize(application, initializationStatus -> {
             try {
-                if (appOpenAdManager != null) {
+                if (appOpenAdManager != null && config != null && config.isAppOpenEnabled()) {
                     appOpenAdManager.fetchAd();
                 }
             } catch (Exception e) {
-                /* Pre-fetching failed */
+                SmartAdsLogger.e("Pre-fetching App Open Ad failed: " + e.getMessage());
             }
         });
 
@@ -264,7 +323,7 @@ public class SmartAds {
      * @param activity The current activity.
      */
     public void showAppOpenAd(Activity activity) {
-        if (canShowAds() && appOpenAdManager != null) {
+        if (canShowAds() && config.isAppOpenEnabled() && appOpenAdManager != null) {
             appOpenAdManager.showAdIfAvailable();
         }
     }
@@ -291,18 +350,34 @@ public class SmartAds {
      */
     public void setAdsEnabled(boolean enabled) {
         this.adsEnabled = enabled;
+        SmartAdsLogger.d("Ads globally " + (enabled ? "ENABLED" : "DISABLED"));
     }
 
+    /**
+     * Checks if ads are currently enabled in the SDK.
+     *
+     * @return true if enabled, false if disabled.
+     */
     public boolean areAdsEnabled() {
         return this.adsEnabled;
     }
 
+    /**
+     * Sets the developer-side listener for App Open Ads.
+     *
+     * @param listener The listener for App Open Ad events.
+     */
     public void setAppOpenAdListener(AppOpenAdListener listener) {
         if (appOpenAdManager != null) {
             appOpenAdManager.setListener(listener);
         }
     }
 
+    /**
+     * Sets the global analytics listener for ad revenue events.
+     *
+     * @param listener The analytics listener.
+     */
     public void setAnalyticsListener(SmartAdsAnalyticsListener listener) {
         this.analyticsListener = listener;
     }
@@ -372,8 +447,11 @@ public class SmartAds {
      * @param listener The listener for ad events.
      */
     public void showInterstitialAd(Activity activity, InterstitialAdListener listener) {
-        if (canShowAds()) {
+        if (canShowAds() && config.isInterstitialEnabled()) {
             interstitialAdManager.showAd(activity, listener);
+        } else {
+            if (listener != null)
+                listener.onAdFailedToShow("Ad condition not met or Interstitial ads disabled.");
         }
     }
 
@@ -406,11 +484,11 @@ public class SmartAds {
      * @param listener Callback listener.
      */
     public void showRewardedAd(Activity activity, RewardedAdListener listener) {
-        if (canShowAds() && config.isRewardedConfigured()) {
+        if (canShowAds() && config.isRewardedConfigured() && config.isRewardedEnabled()) {
             rewardedAdManager.showAd(activity, listener);
         } else {
             if (listener != null)
-                listener.onAdFailedToShow("Ad condition not met or ad unit not configured.");
+                listener.onAdFailedToShow("Ad condition not met or Rewarded ads disabled.");
         }
     }
 
@@ -437,11 +515,11 @@ public class SmartAds {
      */
     @RequiresPermission(Manifest.permission.INTERNET)
     public void showBannerAd(Activity activity, FrameLayout adContainer, BannerAdListener listener) {
-        if (canShowAds() && config.isBannerConfigured()) {
+        if (canShowAds() && config.isBannerConfigured() && config.isBannerEnabled()) {
             bannerAdManager.loadAndShowAd(activity, adContainer, config, listener);
         } else {
             if (listener != null)
-                listener.onAdFailed("Ad condition not met or ad unit not configured.");
+                listener.onAdFailed("Ad condition not met or Banner ads disabled.");
         }
     }
 
@@ -457,11 +535,11 @@ public class SmartAds {
      */
     public void showNativeAd(Activity activity, FrameLayout adContainer, @LayoutRes int layoutRes,
             NativeAdListener listener) {
-        if (canShowAds() && config.isNativeConfigured()) {
+        if (canShowAds() && config.isNativeConfigured() && config.isNativeEnabled()) {
             nativeAdManager.loadAndShowAd(activity, adContainer, layoutRes, config, listener);
         } else {
             if (listener != null)
-                listener.onAdFailed("Ad condition not met or ad unit not configured.");
+                listener.onAdFailed("Ad condition not met or Native ads disabled.");
         }
     }
 
@@ -474,11 +552,11 @@ public class SmartAds {
      * @param listener    Callback listener.
      */
     public void showNativeAd(Activity activity, FrameLayout adContainer, NativeAdSize size, NativeAdListener listener) {
-        if (canShowAds() && config.isNativeConfigured()) {
+        if (canShowAds() && config.isNativeConfigured() && config.isNativeEnabled()) {
             nativeAdManager.loadAndShowAd(activity, adContainer, size, config, listener);
         } else {
             if (listener != null)
-                listener.onAdFailed("Ad condition not met or ad unit not configured.");
+                listener.onAdFailed("Ad condition not met or Native ads disabled.");
         }
     }
 

@@ -20,6 +20,9 @@ import java.util.Random;
  */
 public class HouseAdLoader {
 
+    private static long lastClickTime = 0;
+    private static final long CLICK_DEBOUNCE_MS = 1000L;
+
     private HouseAdLoader() {
         // Utility class
     }
@@ -68,6 +71,15 @@ public class HouseAdLoader {
             com.partharoypc.smartads.SmartAdsLogger.e("House Ad click failed: Ad or URL is null.");
             return;
         }
+
+        // AdMob Policy: Prevent deceptive double-clicks and accidental fire.
+        long currentTime = System.currentTimeMillis();
+        if (currentTime - lastClickTime < CLICK_DEBOUNCE_MS) {
+            com.partharoypc.smartads.SmartAdsLogger.d("Ignoring duplicate House Ad click (Debounce).");
+            return;
+        }
+        lastClickTime = currentTime;
+
         try {
             Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(ad.getClickUrl()));
             if (!(context instanceof android.app.Activity)) {

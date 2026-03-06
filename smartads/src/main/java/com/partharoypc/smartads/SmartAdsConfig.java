@@ -21,6 +21,15 @@ public class SmartAdsConfig {
     private final boolean collapsibleBannerEnabled;
     private final boolean useUmpConsent;
     private final boolean houseAdsEnabled;
+    private final int umpDebugGeography;
+    private final String umpTestDeviceHashedId;
+
+    // Granular format switches
+    private final boolean bannerEnabled;
+    private final boolean interstitialEnabled;
+    private final boolean rewardedEnabled;
+    private final boolean nativeEnabled;
+    private final boolean appOpenEnabled;
 
     // Targeting & Limits
     private final String maxAdContentRating;
@@ -57,6 +66,14 @@ public class SmartAdsConfig {
         this.collapsibleBannerEnabled = builder.collapsibleBannerEnabled;
         this.useUmpConsent = builder.useUmpConsent;
         this.houseAdsEnabled = builder.houseAdsEnabled;
+        this.umpDebugGeography = builder.umpDebugGeography;
+        this.umpTestDeviceHashedId = builder.umpTestDeviceHashedId;
+
+        this.bannerEnabled = builder.bannerEnabled;
+        this.interstitialEnabled = builder.interstitialEnabled;
+        this.rewardedEnabled = builder.rewardedEnabled;
+        this.nativeEnabled = builder.nativeEnabled;
+        this.appOpenEnabled = builder.appOpenEnabled;
 
         this.maxAdContentRating = builder.maxAdContentRating;
         this.tagForChildDirectedTreatment = builder.tagForChildDirectedTreatment;
@@ -120,6 +137,34 @@ public class SmartAdsConfig {
 
     public boolean isHouseAdsEnabled() {
         return houseAdsEnabled;
+    }
+
+    public int getUmpDebugGeography() {
+        return umpDebugGeography;
+    }
+
+    public String getUmpTestDeviceHashedId() {
+        return umpTestDeviceHashedId;
+    }
+
+    public boolean isBannerEnabled() {
+        return bannerEnabled;
+    }
+
+    public boolean isInterstitialEnabled() {
+        return interstitialEnabled;
+    }
+
+    public boolean isRewardedEnabled() {
+        return rewardedEnabled;
+    }
+
+    public boolean isNativeEnabled() {
+        return nativeEnabled;
+    }
+
+    public boolean isAppOpenEnabled() {
+        return appOpenEnabled;
     }
 
     public String getMaxAdContentRating() {
@@ -218,6 +263,16 @@ public class SmartAdsConfig {
         private boolean collapsibleBannerEnabled = false;
         private boolean useUmpConsent = false;
         private boolean houseAdsEnabled = false;
+        private int umpDebugGeography = com.google.android.ump.ConsentDebugSettings.DebugGeography.DEBUG_GEOGRAPHY_DISABLED;
+        private String umpTestDeviceHashedId = "";
+
+        // Granular switches (Default to true so they are active unless explicitly
+        // disabled)
+        private boolean bannerEnabled = true;
+        private boolean interstitialEnabled = true;
+        private boolean rewardedEnabled = true;
+        private boolean nativeEnabled = true;
+        private boolean appOpenEnabled = true;
 
         // Targeting
         private String maxAdContentRating = RequestConfiguration.MAX_AD_CONTENT_RATING_G;
@@ -258,6 +313,14 @@ public class SmartAdsConfig {
             this.collapsibleBannerEnabled = config.collapsibleBannerEnabled;
             this.useUmpConsent = config.useUmpConsent;
             this.houseAdsEnabled = config.houseAdsEnabled;
+            this.umpDebugGeography = config.umpDebugGeography;
+            this.umpTestDeviceHashedId = config.umpTestDeviceHashedId;
+
+            this.bannerEnabled = config.bannerEnabled;
+            this.interstitialEnabled = config.interstitialEnabled;
+            this.rewardedEnabled = config.rewardedEnabled;
+            this.nativeEnabled = config.nativeEnabled;
+            this.appOpenEnabled = config.appOpenEnabled;
 
             this.maxAdContentRating = config.maxAdContentRating;
             this.tagForChildDirectedTreatment = config.tagForChildDirectedTreatment;
@@ -277,26 +340,41 @@ public class SmartAdsConfig {
 
         // --- Ad Unit IDs ---
 
+        /**
+         * Sets the AdMob App Open Ad unit ID.
+         */
         public Builder setAdMobAppOpenId(String id) {
             this.adMobAppOpenId = id;
             return this;
         }
 
+        /**
+         * Sets the AdMob Banner Ad unit ID.
+         */
         public Builder setAdMobBannerId(String id) {
             this.adMobBannerId = id;
             return this;
         }
 
+        /**
+         * Sets the AdMob Interstitial Ad unit ID.
+         */
         public Builder setAdMobInterstitialId(String id) {
             this.adMobInterstitialId = id;
             return this;
         }
 
+        /**
+         * Sets the AdMob Rewarded Ad unit ID.
+         */
         public Builder setAdMobRewardedId(String id) {
             this.adMobRewardedId = id;
             return this;
         }
 
+        /**
+         * Sets the AdMob Native Ad unit ID.
+         */
         public Builder setAdMobNativeId(String id) {
             this.adMobNativeId = id;
             return this;
@@ -352,18 +430,84 @@ public class SmartAdsConfig {
             return this;
         }
 
+        /**
+         * Sets UMP Debug Geography for testing GDPR (e.g. DEBUG_GEOGRAPHY_EEA).
+         */
+        public Builder setUmpDebugGeography(int geography) {
+            this.umpDebugGeography = geography;
+            return this;
+        }
+
+        /**
+         * Sets UMP Test Device Hashed ID for debugging consent forms.
+         */
+        public Builder setUmpTestDeviceHashedId(String hashedId) {
+            this.umpTestDeviceHashedId = hashedId;
+            return this;
+        }
+
+        /**
+         * Enables or disables Banner ads. Default: true
+         */
+        public Builder setBannerEnabled(boolean enabled) {
+            this.bannerEnabled = enabled;
+            return this;
+        }
+
+        /**
+         * Enables or disables Interstitial ads. Default: true
+         */
+        public Builder setInterstitialEnabled(boolean enabled) {
+            this.interstitialEnabled = enabled;
+            return this;
+        }
+
+        /**
+         * Enables or disables Rewarded ads. Default: true
+         */
+        public Builder setRewardedEnabled(boolean enabled) {
+            this.rewardedEnabled = enabled;
+            return this;
+        }
+
+        /**
+         * Enables or disables Native ads. Default: true
+         */
+        public Builder setNativeEnabled(boolean enabled) {
+            this.nativeEnabled = enabled;
+            return this;
+        }
+
+        /**
+         * Enables or disables App Open ads. Default: true
+         */
+        public Builder setAppOpenEnabled(boolean enabled) {
+            this.appOpenEnabled = enabled;
+            return this;
+        }
+
         // --- Configuration & Limits ---
 
+        /**
+         * Sets the maximum content rating for ads (e.g.
+         * RequestConfiguration.MAX_AD_CONTENT_RATING_G).
+         */
         public Builder setMaxAdContentRating(String rating) {
             this.maxAdContentRating = rating;
             return this;
         }
 
+        /**
+         * Sets tag for child directed treatment.
+         */
         public Builder setTagForChildDirectedTreatment(int tag) {
             this.tagForChildDirectedTreatment = tag;
             return this;
         }
 
+        /**
+         * Sets tag for under age of consent.
+         */
         public Builder setTagForUnderAgeOfConsent(int tag) {
             this.tagForUnderAgeOfConsent = tag;
             return this;

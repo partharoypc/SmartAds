@@ -23,4 +23,6 @@
     <color name="smartads_black">#000000</color>
     <color name="smartads_transparent">#00000000</color>
     <color name="smartads_surface_card">#FFFFFF</color>
+    <color name="smartads_ad_surface_bg">#F1F5F9</color>
+    <color name="smartads_ad_stroke">#CBD5E1</color>
 </resources>

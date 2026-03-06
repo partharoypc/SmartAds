@@ -4,10 +4,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    app:cardBackgroundColor="@color/smartads_transparent"
+    android:layout_margin="4dp"
+    app:cardBackgroundColor="@color/smartads_ad_surface_bg"
     app:cardCornerRadius="8dp"
     app:cardElevation="2dp"
-    app:strokeColor="@color/smartads_ad_body"
+    app:strokeColor="@color/smartads_ad_stroke"
     app:strokeWidth="1dp">
 
     <FrameLayout
