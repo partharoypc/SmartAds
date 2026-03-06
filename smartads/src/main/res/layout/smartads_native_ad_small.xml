@@ -8,9 +8,9 @@
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="8dp"
+        android:layout_margin="5dp"
         app:cardBackgroundColor="@color/smartads_ad_surface_bg"
-        app:cardCornerRadius="12dp"
+        app:cardCornerRadius="8dp"
         app:cardElevation="2dp"
         app:strokeColor="@color/smartads_ad_stroke"
         app:strokeWidth="1.5dp">
