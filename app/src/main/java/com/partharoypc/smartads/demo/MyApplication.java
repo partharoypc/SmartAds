@@ -11,7 +11,12 @@ public class MyApplication extends Application {
                 super.onCreate();
 
                 SmartAdsConfig config = new SmartAdsConfig.Builder()
-                                .setAdsEnabled(true)
+                                .setAdsEnabled(true) // Global Master Switch
+                                .setBannerEnabled(true) // Granular Toggle
+                                .setInterstitialEnabled(true) // Granular Toggle
+                                .setRewardedEnabled(true) // Granular Toggle
+                                .setAppOpenEnabled(true) // Granular Toggle
+                                .setNativeEnabled(true) // Granular Toggle
                                 .setTestModeEnabled(true)
                                 .setAdMobBannerId("ca-app-pub-3940256099942544/6300978111")
                                 .setAdMobInterstitialId("ca-app-pub-3940256099942544/1033173712")
